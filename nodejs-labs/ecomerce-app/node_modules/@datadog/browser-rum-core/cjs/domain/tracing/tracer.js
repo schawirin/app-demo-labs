@@ -1,0 +1,192 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TraceIdentifier = void 0;
+exports.isTracingOption = isTracingOption;
+exports.clearTracingIfNeeded = clearTracingIfNeeded;
+exports.startTracer = startTracer;
+exports.isTracingSupported = isTracingSupported;
+var browser_core_1 = require("@datadog/browser-core");
+function isTracingOption(item) {
+    var expectedItem = item;
+    return ((0, browser_core_1.getType)(expectedItem) === 'object' &&
+        (0, browser_core_1.isMatchOption)(expectedItem.match) &&
+        Array.isArray(expectedItem.propagatorTypes));
+}
+/**
+ * Clear tracing information to avoid incomplete traces. Ideally, we should do it when the
+ * request did not reach the server, but the browser does not expose this. So, we clear tracing
+ * information if the request ended with status 0 without being aborted by the application.
+ *
+ * Reasoning:
+ *
+ * * Applications are usually aborting requests after a bit of time, for example when the user is
+ * typing (autocompletion) or navigating away (in a SPA). With a performant device and good
+ * network conditions, the request is likely to reach the server before being canceled.
+ *
+ * * Requests aborted otherwise (ex: lack of internet, CORS issue, blocked by a privacy extension)
+ * are likely to finish quickly and without reaching the server.
+ *
+ * Of course, it might not be the case every time, but it should limit having incomplete traces a
+ * bit.
+ * */
+function clearTracingIfNeeded(context) {
+    if (context.status === 0 && !context.isAborted) {
+        context.traceId = undefined;
+        context.spanId = undefined;
+        context.traceSampled = undefined;
+    }
+}
+function startTracer(configuration, sessionManager) {
+    return {
+        clearTracingIfNeeded: clearTracingIfNeeded,
+        traceFetch: function (context) {
+            return injectHeadersIfTracingAllowed(configuration, context, sessionManager, function (tracingHeaders) {
+                var _a;
+                if (context.input instanceof Request && !((_a = context.init) === null || _a === void 0 ? void 0 : _a.headers)) {
+                    context.input = new Request(context.input);
+                    Object.keys(tracingHeaders).forEach(function (key) {
+                        ;
+                        context.input.headers.append(key, tracingHeaders[key]);
+                    });
+                }
+                else {
+                    context.init = (0, browser_core_1.shallowClone)(context.init);
+                    var headers_1 = [];
+                    if (context.init.headers instanceof Headers) {
+                        context.init.headers.forEach(function (value, key) {
+                            headers_1.push([key, value]);
+                        });
+                    }
+                    else if (Array.isArray(context.init.headers)) {
+                        context.init.headers.forEach(function (header) {
+                            headers_1.push(header);
+                        });
+                    }
+                    else if (context.init.headers) {
+                        Object.keys(context.init.headers).forEach(function (key) {
+                            headers_1.push([key, context.init.headers[key]]);
+                        });
+                    }
+                    context.init.headers = headers_1.concat((0, browser_core_1.objectEntries)(tracingHeaders));
+                }
+            });
+        },
+        traceXhr: function (context, xhr) {
+            return injectHeadersIfTracingAllowed(configuration, context, sessionManager, function (tracingHeaders) {
+                Object.keys(tracingHeaders).forEach(function (name) {
+                    xhr.setRequestHeader(name, tracingHeaders[name]);
+                });
+            });
+        },
+    };
+}
+function injectHeadersIfTracingAllowed(configuration, context, sessionManager, inject) {
+    if (!isTracingSupported() || !sessionManager.findTrackedSession()) {
+        return;
+    }
+    var tracingOption = (0, browser_core_1.find)(configuration.allowedTracingUrls, function (tracingOption) {
+        return (0, browser_core_1.matchList)([tracingOption.match], context.url, true);
+    });
+    if (!tracingOption) {
+        return;
+    }
+    context.traceSampled = !(0, browser_core_1.isNumber)(configuration.traceSampleRate) || (0, browser_core_1.performDraw)(configuration.traceSampleRate);
+    if (!context.traceSampled && configuration.traceContextInjection !== browser_core_1.TraceContextInjection.ALL) {
+        return;
+    }
+    context.traceId = new TraceIdentifier();
+    context.spanId = new TraceIdentifier();
+    inject(makeTracingHeaders(context.traceId, context.spanId, context.traceSampled, tracingOption.propagatorTypes));
+}
+function isTracingSupported() {
+    return getCrypto() !== undefined;
+}
+function getCrypto() {
+    return window.crypto || window.msCrypto;
+}
+/**
+ * When trace is not sampled, set priority to '0' instead of not adding the tracing headers
+ * to prepare the implementation for sampling delegation.
+ */
+function makeTracingHeaders(traceId, spanId, traceSampled, propagatorTypes) {
+    var tracingHeaders = {};
+    propagatorTypes.forEach(function (propagatorType) {
+        switch (propagatorType) {
+            case 'datadog': {
+                (0, browser_core_1.assign)(tracingHeaders, {
+                    'x-datadog-origin': 'rum',
+                    'x-datadog-parent-id': spanId.toDecimalString(),
+                    'x-datadog-sampling-priority': traceSampled ? '1' : '0',
+                    'x-datadog-trace-id': traceId.toDecimalString(),
+                });
+                break;
+            }
+            // https://www.w3.org/TR/trace-context/
+            case 'tracecontext': {
+                (0, browser_core_1.assign)(tracingHeaders, {
+                    traceparent: "00-0000000000000000".concat(traceId.toPaddedHexadecimalString(), "-").concat(spanId.toPaddedHexadecimalString(), "-0").concat(traceSampled ? '1' : '0'),
+                });
+                break;
+            }
+            // https://github.com/openzipkin/b3-propagation
+            case 'b3': {
+                (0, browser_core_1.assign)(tracingHeaders, {
+                    b3: "".concat(traceId.toPaddedHexadecimalString(), "-").concat(spanId.toPaddedHexadecimalString(), "-").concat(traceSampled ? '1' : '0'),
+                });
+                break;
+            }
+            case 'b3multi': {
+                (0, browser_core_1.assign)(tracingHeaders, {
+                    'X-B3-TraceId': traceId.toPaddedHexadecimalString(),
+                    'X-B3-SpanId': spanId.toPaddedHexadecimalString(),
+                    'X-B3-Sampled': traceSampled ? '1' : '0',
+                });
+                break;
+            }
+        }
+    });
+    return tracingHeaders;
+}
+/* eslint-disable no-bitwise */
+var TraceIdentifier = /** @class */ (function () {
+    function TraceIdentifier() {
+        this.buffer = new Uint8Array(8);
+        getCrypto().getRandomValues(this.buffer);
+        this.buffer[0] = this.buffer[0] & 0x7f; // force 63-bit
+    }
+    TraceIdentifier.prototype.toString = function (radix) {
+        var high = this.readInt32(0);
+        var low = this.readInt32(4);
+        var str = '';
+        do {
+            var mod = (high % radix) * 4294967296 + low;
+            high = Math.floor(high / radix);
+            low = Math.floor(mod / radix);
+            str = (mod % radix).toString(radix) + str;
+        } while (high || low);
+        return str;
+    };
+    /**
+     * Format used everywhere except the trace intake
+     */
+    TraceIdentifier.prototype.toDecimalString = function () {
+        return this.toString(10);
+    };
+    /**
+     * Format used by OTel headers
+     */
+    TraceIdentifier.prototype.toPaddedHexadecimalString = function () {
+        var traceId = this.toString(16);
+        return Array(17 - traceId.length).join('0') + traceId;
+    };
+    TraceIdentifier.prototype.readInt32 = function (offset) {
+        return (this.buffer[offset] * 16777216 +
+            (this.buffer[offset + 1] << 16) +
+            (this.buffer[offset + 2] << 8) +
+            this.buffer[offset + 3]);
+    };
+    return TraceIdentifier;
+}());
+exports.TraceIdentifier = TraceIdentifier;
+/* eslint-enable no-bitwise */
+//# sourceMappingURL=tracer.js.map

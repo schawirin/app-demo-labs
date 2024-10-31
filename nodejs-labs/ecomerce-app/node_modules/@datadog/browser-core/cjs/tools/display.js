@@ -1,0 +1,42 @@
+"use strict";
+/* eslint-disable local-rules/disallow-side-effects */
+/**
+ * Keep references on console methods to avoid triggering patched behaviors
+ *
+ * NB: in some setup, console could already be patched by another SDK.
+ * In this case, some display messages can be sent by the other SDK
+ * but we should be safe from infinite loop nonetheless.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DOCS_ORIGIN = exports.display = exports.originalConsoleMethods = exports.globalConsole = exports.ConsoleApiName = void 0;
+exports.ConsoleApiName = {
+    log: 'log',
+    debug: 'debug',
+    info: 'info',
+    warn: 'warn',
+    error: 'error',
+};
+/**
+ * When building JS bundles, some users might use a plugin[1] or configuration[2] to remove
+ * "console.*" references. This causes some issue as we expect `console.*` to be defined.
+ * As a workaround, let's use a variable alias, so those expressions won't be taken into account by
+ * simple static analysis.
+ *
+ * [1]: https://babeljs.io/docs/babel-plugin-transform-remove-console/
+ * [2]: https://github.com/terser/terser#compress-options (look for drop_console)
+ */
+exports.globalConsole = console;
+exports.originalConsoleMethods = {};
+Object.keys(exports.ConsoleApiName).forEach(function (name) {
+    exports.originalConsoleMethods[name] = exports.globalConsole[name];
+});
+var PREFIX = 'Datadog Browser SDK:';
+exports.display = {
+    debug: exports.originalConsoleMethods.debug.bind(exports.globalConsole, PREFIX),
+    log: exports.originalConsoleMethods.log.bind(exports.globalConsole, PREFIX),
+    info: exports.originalConsoleMethods.info.bind(exports.globalConsole, PREFIX),
+    warn: exports.originalConsoleMethods.warn.bind(exports.globalConsole, PREFIX),
+    error: exports.originalConsoleMethods.error.bind(exports.globalConsole, PREFIX),
+};
+exports.DOCS_ORIGIN = 'https://docs.datadoghq.com';
+//# sourceMappingURL=display.js.map

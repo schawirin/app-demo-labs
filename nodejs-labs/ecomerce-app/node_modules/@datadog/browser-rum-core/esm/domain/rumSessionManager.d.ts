@@ -1,0 +1,30 @@
+import type { RelativeTime, TrackingConsentState } from '@datadog/browser-core';
+import { Observable } from '@datadog/browser-core';
+import type { RumConfiguration } from './configuration';
+import type { LifeCycle } from './lifeCycle';
+export declare const RUM_SESSION_KEY = "rum";
+export interface RumSessionManager {
+    findTrackedSession: (startTime?: RelativeTime) => RumSession | undefined;
+    expire: () => void;
+    expireObservable: Observable<void>;
+    setForcedReplay: () => void;
+}
+export type RumSession = {
+    id: string;
+    sessionReplay: SessionReplayState;
+};
+export declare const enum RumTrackingType {
+    NOT_TRACKED = "0",
+    TRACKED_WITH_SESSION_REPLAY = "1",
+    TRACKED_WITHOUT_SESSION_REPLAY = "2"
+}
+export declare const enum SessionReplayState {
+    OFF = 0,
+    SAMPLED = 1,
+    FORCED = 2
+}
+export declare function startRumSessionManager(configuration: RumConfiguration, lifeCycle: LifeCycle, trackingConsentState: TrackingConsentState): RumSessionManager;
+/**
+ * Start a tracked replay session stub
+ */
+export declare function startRumSessionManagerStub(): RumSessionManager;

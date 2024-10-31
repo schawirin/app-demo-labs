@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-sanity-stripe-deployment
+  labels:
+    app: ecommerce-sanity-stripe
+    tags.datadoghq.com/env: production
+    tags.datadoghq.com/service: ecommerce-sanity-stripe
+    tags.datadoghq.com/version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ecommerce-sanity-stripe
+  template:
+    metadata:
+      labels:
+        app: ecommerce-sanity-stripe
+        tags.datadoghq.com/env: production
+        tags.datadoghq.com/service: ecommerce-sanity-stripe
+        tags.datadoghq.com/version: v2.0
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/js-lib.version: v4.17.0
+    spec:
+      containers:
+        - name: ecommerce-sanity-stripe
+          image: schawirin/ecomerce:v2.7
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: DD_PROFILING_ENABLED
+              value: "true"
+            - name: DD_LOGS_INJECTION
+              value: "true"
+            - name: NODE_ENV
+              value: production
+
