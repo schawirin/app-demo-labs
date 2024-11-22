@@ -1,0 +1,47 @@
+# Deployment da Aplicação Java
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sandbox-app
+  namespace: otel
+  labels:
+    app: sandbox-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sandbox-app
+  template:
+    metadata:
+      labels:
+        app: sandbox-app
+    spec:
+      containers:
+        - name: sandbox-app
+          image: schawirin/java-sandbox-otel:v2
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector:4317"
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: "service.name=sandbox-service"
+---
+# Service da Aplicação Java
+apiVersion: v1
+kind: Service
+metadata:
+  name: sandbox-app
+  namespace: otel
+  labels:
+    app: sandbox-app
+spec:
+  selector:
+    app: sandbox-app
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
