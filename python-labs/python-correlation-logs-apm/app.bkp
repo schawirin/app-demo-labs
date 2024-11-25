@@ -1,0 +1,27 @@
+from flask import Flask, render_template
+import logging
+
+# Configurando o logger
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+app = Flask(__name__)
+
+# Função para retornar a página principal
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+# Função que simula gerar um trace, mas não redireciona
+@app.route('/generate_trace', methods=['POST'])
+def generate_trace():
+    logging.info("Trace gerado")
+    return "Trace created"
+
+# Função que simula gerar um log, mas não redireciona
+@app.route('/generate_log', methods=['POST'])
+def generate_log():
+    logging.info("Test correlation log generated")
+    return "Log created"
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)

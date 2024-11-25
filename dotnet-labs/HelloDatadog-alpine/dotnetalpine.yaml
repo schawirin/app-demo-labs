@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dotnet-alpine
+  labels:
+    tags.datadoghq.com/env: dev
+    tags.datadoghq.com/service: dotnet-alpine
+    tags.datadoghq.com/version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dotnet-alpine
+  template:
+    metadata:
+      labels:
+        app: dotnet-alpine
+        tags.datadoghq.com/env: dev
+        tags.datadoghq.com/service: dotnet-alpine
+        tags.datadoghq.com/version: v1
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/dotnet-lib.version: v2.42.0
+    spec:
+      containers:
+      - name: dotnet-alpine
+        image: schawirin/dotnetalpine:v1 # Substitua pela imagem correta
+        ports:
+        - containerPort: 5000
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
+        - name: DD_LOGS_INJECTION
+          value: "true"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dotnet-alpine-service
+spec:
+  selector:
+    app: dotnet-alpine
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
