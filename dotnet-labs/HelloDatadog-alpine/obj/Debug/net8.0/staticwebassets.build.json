@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "4/yn5BNCAn1TWOKN7t8lWbQ7Qt6YVJxay2Hh3NrRagE=",
+  "Source": "HelloDatadog",
+  "BasePath": "_content/HelloDatadog",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-sandbox-app
+  labels:
+    tags.datadoghq.com/env: sandbox                 # Define o ambiente (ex: sandboxução)
+    tags.datadoghq.com/service: python-sandbox   # Nome do serviço para o Datadog APM
+    tags.datadoghq.com/version: 1.0.0            # Versão do serviço
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: python-sandbox-app
+  template:
+    metadata:
+      labels:
+        app: python-sandbox-app
+        tags.datadoghq.com/env: sandbox             # Define o ambiente (ex: sandboxução)
+        tags.datadoghq.com/service: python-sandbox  # Nome do serviço para o Datadog APM
+        tags.datadoghq.com/version: 1.0.0        # Versão do serviço
+        admission.datadoghq.com/enabled: "true"  # Habilita o Admission Controller Datadog
+      annotations:
+        admission.datadoghq.com/python-lib.version: v2.13.0  # Versão da lib do Datadog a ser injetada
+    spec:
+      containers:
+        - name: python-sandbox-app
+          image: schawirin/python-sandbox:v3  # Substitua pela sua imagem Docker
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DD_LOGS_INJECTION
+              value: "true"   # Habilita a injeção automática de logs no Datadog
+            - name: DD_ENV
+              value: "sandbox"   # Define o ambiente do Datadog
+            - name: DD_SERVICE
+              value: "python-sandbox"  # Nome do serviço no Datadog APM
+            - name: DD_VERSION
+              value: "1.0.0"   # Versão do aplicativo monitorado
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+            requests:
+              memory: "256Mi"
+              cpu: "250m"

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello, Datadog</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #e0f7fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            text-align: center;
+        }
+        h1 {
+            color: #00796b;
+            font-size: 3em;
+            margin-bottom: 30px;
+        }
+        .button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 1.2em;
+            color: #ffffff;
+            background-color: #00796b;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #004d40;
+        }
+    </style>
+    <script>
+        function generateTrace() {
+            fetch('/generate-trace', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .catch(error => console.error('Error:', error));
+        }
+
+        function generateTraceWithLog() {
+            fetch('/generate-trace-with-log', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Hello, Datadog</h1>
+        <button class="button" onclick="generateTrace()">Generate Trace</button>
+        <button class="button" onclick="generateTraceWithLog()">Generate Trace with Log</button>
+    </div>
+</body>
+</html>
