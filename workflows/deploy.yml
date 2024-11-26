@@ -1,13 +1,7 @@
-name: Deploy to EKS
-
-on:
-  push:
-    branches:
-      - main
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: eks-latam-deploy  # Vincula ao Environment correto
 
     steps:
       # 1. Checkout do código
@@ -22,7 +16,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # 3. Atualizar kubeconfig para o EKS
+      # 3. Atualizar o kubeconfig para EKS
       - name: Update kubeconfig for EKS
         run: aws eks update-kubeconfig --name eks-sales-saleslatam
 
