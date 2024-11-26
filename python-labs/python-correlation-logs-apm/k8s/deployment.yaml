@@ -17,7 +17,7 @@ spec:
         app: python-sandbox-app
         tags.datadoghq.com/env: sandbox             # Define o ambiente (ex: sandboxução)
         tags.datadoghq.com/service: python-sandbox  # Nome do serviço para o Datadog APM
-        tags.datadoghq.com/version: 1.0.0        # Versão do serviço
+        tags.datadoghq.com/version: 1.0.1        # Versão do serviço
         admission.datadoghq.com/enabled: "true"  # Habilita o Admission Controller Datadog
       annotations:
         admission.datadoghq.com/python-lib.version: v2.13.0  # Versão da lib do Datadog a ser injetada
