@@ -8,14 +8,20 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: eks-latam-deploy  # Referencia o Environment correto
+    environment: eks-latam-deploy
 
     steps:
       # 1. Checkout do código
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Configurar as credenciais da AWS
+      # 2. Debug para verificar os secrets (remova depois de testar)
+      - name: Debug secrets
+        run: |
+          echo "AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}"
+          echo "AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+
+      # 3. Configurar as credenciais da AWS
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -23,10 +29,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # 3. Atualizar kubeconfig para EKS
+      # 4. Atualizar kubeconfig para EKS
       - name: Update kubeconfig for EKS
         run: aws eks update-kubeconfig --name eks-sales-saleslatam
 
-      # 4. Aplicar o Deployment
+      # 5. Aplicar o Deployment
       - name: Deploy to EKS
         run: kubectl apply -f k8s/deployment.yaml
