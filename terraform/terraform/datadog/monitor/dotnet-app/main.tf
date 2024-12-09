@@ -10,6 +10,7 @@ terraform {
 provider "datadog" {
   api_key = var.datadog_api_key
   app_key = var.datadog_app_key
+  api_url = "https://api.us5.datadoghq.com"
 }
 
 # Monitor para alta taxa de erros
@@ -83,57 +84,56 @@ EOT
   }
 }
 
-## SLO combinando todos os monitores
-#resource "datadog_service_level_objective" "zupper_api_slo" {
-#  name        = "zupper-api"
-#  type        = "monitor"
-#  description = "SLO para zupper-api cobrindo erros, latência e disponibilidade de containers."
-#
-#  monitor_ids = [
-#    datadog_monitor.zupper_api_errors.id,
-#    datadog_monitor.zupper_api_latency.id,
-#    datadog_monitor.zupper_api_container_availability.id
-#  ]
-#
-#  thresholds {
-#    timeframe = "30d"
-#    target    = 90
-#    warning   = 95
-#  }
-#
-#  tags = ["team:sre", "terraform:true", "service:auth-dotnet", "env:prod"]
-#}
-#
-## Definição de serviço
-#resource "datadog_service_definition_yaml" "service_definition_v2_2" {
-#  service_definition = <<EOF
-#schema-version: v2.2
-#dd-service: zupper
-#team: sre
-#contacts:
-#  - name: Support Email
-#    type: email
-#    contact: rock.meira@contabilizei.com.br
-#  - name: Support Slack
-#    type: slack
-#    contact: https://www.slack.com/archives/zupper
-#description: shopping cart service responsible for managing shopping carts
-#tier: high
-#lifecycle: production
-#application: zupper
-#languages: 
-#  - python
-#type: web 
-#links:
-#  - name: zupper source code
-#    type: repo
-#    provider: gerrit
-#    url: http://github/zupper
-#tags:
-#  - team:zupper
-#  - cost-center:sre
-#integrations:
-#extensions:
-#EOF
-#}
-#
+# SLO combinando todos os monitores
+resource "datadog_service_level_objective" "zupper_api_slo" {
+  name        = "zupper-api"
+  type        = "monitor"
+  description = "SLO para zupper-api cobrindo erros, latência e disponibilidade de containers."
+
+  monitor_ids = [
+    datadog_monitor.zupper_api_errors.id,
+    datadog_monitor.zupper_api_latency.id,
+    datadog_monitor.zupper_api_container_availability.id
+  ]
+
+  thresholds {
+    timeframe = "30d"
+    target    = 90
+    warning   = 95
+  }
+
+  tags = ["team:sre", "terraform:true", "service:auth-dotnet", "env:prod"]
+}
+
+# Definição de serviço
+resource "datadog_service_definition_yaml" "service_definition_v2_2" {
+  service_definition = <<EOF
+schema-version: v2.2
+dd-service: zupper
+team: sre
+contacts:
+  - name: Support Email
+    type: email
+    contact: rock.meira@contabilizei.com.br
+  - name: Support Slack
+    type: slack
+    contact: https://www.slack.com/archives/zupper
+description: shopping cart service responsible for managing shopping carts
+tier: high
+lifecycle: production
+application: zupper
+languages: 
+  - python
+type: web 
+links:
+  - name: zupper source code
+    type: repo
+    provider: gerrit
+    url: http://github/zupper
+tags:
+  - team:zupper
+  - cost-center:sre
+integrations:
+extensions:
+EOF
+}

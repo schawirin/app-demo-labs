@@ -1,2 +1,2 @@
-datadog_api_key = "eb9dd083a7076089a156a8b4a225217f"
-datadog_app_key = "0519009f9a4279906bd6386c8a19ae507f185851"
+datadog_api_key = "suaapikey"
+datadog_app_key = "seuappkey"
