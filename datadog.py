@@ -1,12 +1,11 @@
-#!/usr/bin/env python3
 import time
-import socket
 from datadog import initialize, api
 
 # Solicitar informações do usuário
 API_KEY = input("Digite sua API Key do Datadog: ")
 DATADOG_SITE = input("Digite o Datadog Site (ex.: datadoghq.com ou datadoghq.eu): ")
 HOSTNAME = input("Digite o nome do host (hostname): ")
+ENVIRONMENT = input("Digite o ambiente (ex.: production, staging, sandbox): ")
 
 # Inicializar a biblioteca do Datadog
 options = {
@@ -17,46 +16,30 @@ initialize(**options)
 
 # Função para enviar métricas via API
 def send_metrics_api():
+    current_time = time.time()  # Timestamp atual
     metrics_payload = {
         "series": [
             {
                 "metric": "system.cpu.user",
-                "points": [[time.time(), 30.5]],
+                "points": [[current_time, 30.5]],  # Timestamp e valor
                 "type": "gauge",
                 "host": HOSTNAME,
-                "tags": ["env:sandbox", "source:script"],
+                "tags": [f"env:{ENVIRONMENT}", "source:script"],
             },
             {
                 "metric": "system.mem.used",
-                "points": [[time.time(), 2048]],
+                "points": [[current_time, 2048]],  # Timestamp e valor
                 "type": "gauge",
                 "host": HOSTNAME,
-                "tags": ["env:sandbox", "source:script"],
+                "tags": [f"env:{ENVIRONMENT}", "source:script"],
             },
         ]
     }
-    response = api.Metric.send(**metrics_payload)
-    print("Métricas enviadas via API:", response)
-
-# Função para enviar métricas via DogStatsD
-def send_metrics_dogstatsd():
-    # Configuração do DogStatsD
-    statsd_host = "127.0.0.1"
-    statsd_port = 8125
-
-    # Criar socket UDP
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    # Métricas no formato DogStatsD
-    metrics = [
-        f"system.cpu.user:30.5|g|#env:sandbox,source:script,host:{HOSTNAME}",
-        f"system.mem.used:2048|g|#env:sandbox,source:script,host:{HOSTNAME}",
-    ]
-
-    # Enviar métricas
-    for metric in metrics:
-        sock.sendto(metric.encode(), (statsd_host, statsd_port))
-    print("Métricas enviadas via DogStatsD.")
+    try:
+        response = api.Metric.send(**metrics_payload)
+        print("Métricas enviadas via API:", response)
+    except Exception as e:
+        print(f"Erro ao enviar métricas: {e}")
 
 # Menu de execução com envio contínuo
 if __name__ == "__main__":
@@ -64,7 +47,6 @@ if __name__ == "__main__":
     try:
         while True:
             send_metrics_api()  # Enviar via API
-            send_metrics_dogstatsd()  # Enviar via DogStatsD
             time.sleep(10)  # Pausar por 10 segundos
     except KeyboardInterrupt:
         print("\nScript encerrado pelo usuário.")
