@@ -50,6 +50,27 @@ send_to_datadog() {
             "type": "gauge",
             "host": "$HOSTNAME",
             "tags": ["env:$ENVIRONMENT", "source:script"]
+        },
+        {
+            "metric": "system.disk.usage",
+            "points": [[ $(date +%s), ${DISK_USAGE%?} ]],
+            "type": "gauge",
+            "host": "$HOSTNAME",
+            "tags": ["env:$ENVIRONMENT", "source:script"]
+        },
+        {
+            "metric": "system.network.rx",
+            "points": [[ $(date +%s), $NETWORK_RX ]],
+            "type": "gauge",
+            "host": "$HOSTNAME",
+            "tags": ["env:$ENVIRONMENT", "source:script"]
+        },
+        {
+            "metric": "system.network.tx",
+            "points": [[ $(date +%s), $NETWORK_TX ]],
+            "type": "gauge",
+            "host": "$HOSTNAME",
+            "tags": ["env:$ENVIRONMENT", "source:script"]
         }
     ]
 }
