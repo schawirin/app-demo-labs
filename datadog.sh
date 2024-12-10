@@ -35,7 +35,7 @@ def send_metrics_api():
         ]
     }
     response = api.Metric.send(**metrics_payload)
-    print("Resposta da API:", response)
+    print("Métricas enviadas via API:", response)
 
 # Função para enviar métricas via DogStatsD
 def send_metrics_dogstatsd():
@@ -57,8 +57,13 @@ def send_metrics_dogstatsd():
         sock.sendto(metric.encode(), (statsd_host, statsd_port))
     print("Métricas enviadas via DogStatsD.")
 
-# Menu de execução
+# Menu de execução com envio contínuo
 if __name__ == "__main__":
-    print("Enviando métricas para o Datadog...")
-    send_metrics_api()  # Para enviar via API
-    send_metrics_dogstatsd()  # Para enviar via DogStatsD
+    print("Enviando métricas para o Datadog a cada 10 segundos. Pressione Ctrl+C para parar.")
+    try:
+        while True:
+            send_metrics_api()  # Enviar via API
+            send_metrics_dogstatsd()  # Enviar via DogStatsD
+            time.sleep(10)  # Pausar por 10 segundos
+    except KeyboardInterrupt:
+        print("\nScript encerrado pelo usuário.")
