@@ -1,75 +1,56 @@
-import psutil
-from datadog import initialize, statsd
+#!/bin/bash
 
-# Configuração Interativa
-def configure_datadog():
-    api_key = input("Qual sua API Key do Datadog? ").strip()
-    use_proxy = input("Você está usando proxy? (yes/no): ").strip().lower()
-    
-    proxy = None
-    if use_proxy == "yes":
-        proxy = input("Adicione o IP do proxy: ").strip()
-    
-    host_name = input("Adicione o nome do host: ").strip()
+# Pergunta ao usuário as configurações necessárias
+read -p "Qual sua API Key? " DD_API_KEY
+read -p "Você está usando proxy? (yes or no): " USE_PROXY
 
-    return api_key, proxy, host_name
+if [[ "$USE_PROXY" == "yes" ]]; then
+    read -p "Adicione o IP do proxy: " PROXY_IP
+    export http_proxy="http://$PROXY_IP"
+    export https_proxy="http://$PROXY_IP"
+fi
 
-# Inicialização do Datadog
-def initialize_datadog(api_key, proxy=None, host_name=None):
-    options = {
-        'api_key': api_key,
-        'statsd_host': '127.0.0.1',
-        'statsd_port': 8125,
-        'hostname': host_name,
-    }
+read -p "Adicione o nome do host: " HOST_NAME
 
-    if proxy:
-        options['proxies'] = {'http': proxy, 'https': proxy}
-    
-    initialize(**options)
-    return options
+# Configuração do endereço DogStatsD local (Datadog Agent)
+DOGSTATSD_SERVER="127.0.0.1"
+DOGSTATSD_PORT="8125"
 
-# Coleta e envio de métricas
-def collect_and_send_metrics():
-    # CPU
-    cpu_percent = psutil.cpu_percent(interval=1)
-    statsd.gauge('system.cpu.percent', cpu_percent)
+# Função para enviar métricas
+send_metric() {
+    METRIC_NAME=$1
+    METRIC_VALUE=$2
+    METRIC_TYPE=$3
+    METRIC_TAGS=$4
+    echo "$METRIC_NAME:$METRIC_VALUE|$METRIC_TYPE|#$METRIC_TAGS" | nc -u -w1 $DOGSTATSD_SERVER $DOGSTATSD_PORT
+}
 
-    # Memória
-    memory = psutil.virtual_memory()
-    statsd.gauge('system.memory.total', memory.total)
-    statsd.gauge('system.memory.used', memory.used)
-    statsd.gauge('system.memory.free', memory.free)
-    statsd.gauge('system.memory.percent', memory.percent)
+# Loop infinito para envio das métricas a cada 15 segundos
+while true; do
+    # CPU Usage
+    CPU_USAGE=$(grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage}')
+    send_metric "system.cpu.usage" "$CPU_USAGE" "g" "host:$HOST_NAME"
 
-    # Disco
-    disk = psutil.disk_usage('/')
-    statsd.gauge('system.disk.total', disk.total)
-    statsd.gauge('system.disk.used', disk.used)
-    statsd.gauge('system.disk.free', disk.free)
-    statsd.gauge('system.disk.percent', disk.percent)
+    # Memory Usage
+    MEM_TOTAL=$(grep MemTotal /proc/meminfo | awk '{print $2}')
+    MEM_FREE=$(grep MemFree /proc/meminfo | awk '{print $2}')
+    MEM_USAGE=$((MEM_TOTAL - MEM_FREE))
+    send_metric "system.memory.usage" "$MEM_USAGE" "g" "host:$HOST_NAME"
 
-    # Load Average (Unix-specific)
-    if hasattr(psutil, "getloadavg"):
-        load1, load5, load15 = psutil.getloadavg()
-        statsd.gauge('system.load.1', load1)
-        statsd.gauge('system.load.5', load5)
-        statsd.gauge('system.load.15', load15)
+    # Disk Usage
+    DISK_USAGE=$(df / | tail -1 | awk '{print $5}' | tr -d '%')
+    send_metric "system.disk.usage" "$DISK_USAGE" "g" "host:$HOST_NAME"
 
-    # Rede
-    net_io = psutil.net_io_counters()
-    statsd.gauge('system.net.bytes_sent', net_io.bytes_sent)
-    statsd.gauge('system.net.bytes_recv', net_io.bytes_recv)
+    # Network Traffic (bytes received/transmitted)
+    RX_BYTES=$(cat /sys/class/net/eth0/statistics/rx_bytes)
+    TX_BYTES=$(cat /sys/class/net/eth0/statistics/tx_bytes)
+    send_metric "system.net.rx_bytes" "$RX_BYTES" "g" "host:$HOST_NAME"
+    send_metric "system.net.tx_bytes" "$TX_BYTES" "g" "host:$HOST_NAME"
 
-def main():
-    print("=== Configuração Datadog ===")
-    api_key, proxy, host_name = configure_datadog()
-    print("\nInicializando Datadog...")
-    initialize_datadog(api_key, proxy, host_name)
-    print("Coletando e enviando métricas para Datadog...\n")
-    
-    collect_and_send_metrics()
-    print("Métricas enviadas com sucesso!")
+    # Load Average
+    LOAD_AVG=$(cat /proc/loadavg | awk '{print $1}')
+    send_metric "system.load.1min" "$LOAD_AVG" "g" "host:$HOST_NAME"
 
-if __name__ == "__main__":
-    main()
+    # Espera 15 segundos antes da próxima iteração
+    sleep 15
+done
