@@ -1,167 +1,75 @@
-#!/bin/bash
+import psutil
+from datadog import initialize, statsd
 
-# Caminhos para os arquivos
-CONFIG_FILE="/etc/monitoring_script.conf"
-SERVICE_FILE="/etc/systemd/system/monitoring_script.service"
-SCRIPT_PATH="/usr/local/bin/monitoring_script.sh"
+# Configuração Interativa
+def configure_datadog():
+    api_key = input("Qual sua API Key do Datadog? ").strip()
+    use_proxy = input("Você está usando proxy? (yes/no): ").strip().lower()
+    
+    proxy = None
+    if use_proxy == "yes":
+        proxy = input("Adicione o IP do proxy: ").strip()
+    
+    host_name = input("Adicione o nome do host: ").strip()
 
-# Criar arquivo de configuração
-create_config() {
-    echo "Criando arquivo de configuração em $CONFIG_FILE..."
-    cat <<EOF > $CONFIG_FILE
-API_KEY=$API_KEY
-DATADOG_SITE=$DATADOG_SITE
-HOSTNAME=$HOSTNAME
-ENVIRONMENT=$ENVIRONMENT
-PROXY=$PROXY
-EOF
-    echo "Arquivo de configuração criado com sucesso."
-}
+    return api_key, proxy, host_name
 
-# Criar script de monitoramento
-create_script() {
-    echo "Criando script de monitoramento em $SCRIPT_PATH..."
-    cat <<'EOF' > $SCRIPT_PATH
-#!/bin/bash
-source /etc/monitoring_script.conf
+# Inicialização do Datadog
+def initialize_datadog(api_key, proxy=None, host_name=None):
+    options = {
+        'api_key': api_key,
+        'statsd_host': '127.0.0.1',
+        'statsd_port': 8125,
+        'hostname': host_name,
+    }
 
-collect_metrics() {
-    CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}')
-    MEMORY_USAGE=$(free -m | awk 'NR==2{printf "%.2f", $3*100/$2 }')
-    DISK_USAGE=$(df -h / | awk '$NF=="/"{printf "%s", $5}')
-    NETWORK_RX=$(cat /proc/net/dev | awk '/eth0|ens|enp/ {print $2}')
-    NETWORK_TX=$(cat /proc/net/dev | awk '/eth0|ens|enp/ {print $10}')
-    SERVICES=$(systemctl list-units --type=service --state=running | awk '{if (NR>1) print $1}' | tr '\n' ',')
-}
+    if proxy:
+        options['proxies'] = {'http': proxy, 'https': proxy}
+    
+    initialize(**options)
+    return options
 
-send_to_datadog() {
-    METRICS_JSON=$(cat <<EOF2
-{
-    "series": [
-        {
-            "metric": "system.cpu.usage",
-            "points": [[ $(date +%s), $CPU_USAGE ]],
-            "type": "gauge",
-            "host": "$HOSTNAME",
-            "tags": ["env:$ENVIRONMENT", "source:script"]
-        },
-        {
-            "metric": "system.memory.usage",
-            "points": [[ $(date +%s), $MEMORY_USAGE ]],
-            "type": "gauge",
-            "host": "$HOSTNAME",
-            "tags": ["env:$ENVIRONMENT", "source:script"]
-        },
-        {
-            "metric": "system.disk.usage",
-            "points": [[ $(date +%s), ${DISK_USAGE%?} ]],
-            "type": "gauge",
-            "host": "$HOSTNAME",
-            "tags": ["env:$ENVIRONMENT", "source:script"]
-        },
-        {
-            "metric": "system.network.rx",
-            "points": [[ $(date +%s), $NETWORK_RX ]],
-            "type": "gauge",
-            "host": "$HOSTNAME",
-            "tags": ["env:$ENVIRONMENT", "source:script"]
-        },
-        {
-            "metric": "system.network.tx",
-            "points": [[ $(date +%s), $NETWORK_TX ]],
-            "type": "gauge",
-            "host": "$HOSTNAME",
-            "tags": ["env:$ENVIRONMENT", "source:script"]
-        }
-    ]
-}
-EOF2
-)
+# Coleta e envio de métricas
+def collect_and_send_metrics():
+    # CPU
+    cpu_percent = psutil.cpu_percent(interval=1)
+    statsd.gauge('system.cpu.percent', cpu_percent)
 
-    SERVICES_LOG_JSON=$(cat <<EOF3
-{
-    "ddsource": "script",
-    "service": "services-status",
-    "hostname": "$HOSTNAME",
-    "env": "$ENVIRONMENT",
-    "message": "Running services: $SERVICES"
-}
-EOF3
-)
+    # Memória
+    memory = psutil.virtual_memory()
+    statsd.gauge('system.memory.total', memory.total)
+    statsd.gauge('system.memory.used', memory.used)
+    statsd.gauge('system.memory.free', memory.free)
+    statsd.gauge('system.memory.percent', memory.percent)
 
-    if [ "$PROXY" != "no" ]; then
-        curl -X POST -H "Content-type: application/json" \
-            -H "DD-API-KEY: $API_KEY" \
-            -d "$METRICS_JSON" \
-            http://$PROXY/api/v1/series
+    # Disco
+    disk = psutil.disk_usage('/')
+    statsd.gauge('system.disk.total', disk.total)
+    statsd.gauge('system.disk.used', disk.used)
+    statsd.gauge('system.disk.free', disk.free)
+    statsd.gauge('system.disk.percent', disk.percent)
 
-        curl -X POST -H "Content-type: application/json" \
-            -H "DD-API-KEY: $API_KEY" \
-            -d "$SERVICES_LOG_JSON" \
-            http://$PROXY:10514/v1/input
-    else
-        curl -X POST -H "Content-type: application/json" \
-            -H "DD-API-KEY: $API_KEY" \
-            -d "$METRICS_JSON" \
-            https://api.${DATADOG_SITE}/api/v1/series
+    # Load Average (Unix-specific)
+    if hasattr(psutil, "getloadavg"):
+        load1, load5, load15 = psutil.getloadavg()
+        statsd.gauge('system.load.1', load1)
+        statsd.gauge('system.load.5', load5)
+        statsd.gauge('system.load.15', load15)
 
-        curl -X POST -H "Content-type: application/json" \
-            -H "DD-API-KEY: $API_KEY" \
-            -d "$SERVICES_LOG_JSON" \
-            https://http-intake.logs.${DATADOG_SITE}/v1/input
-    fi
-}
+    # Rede
+    net_io = psutil.net_io_counters()
+    statsd.gauge('system.net.bytes_sent', net_io.bytes_sent)
+    statsd.gauge('system.net.bytes_recv', net_io.bytes_recv)
 
-while true; do
-    collect_metrics
-    send_to_datadog
-    sleep 10
-done
-EOF
-    chmod +x $SCRIPT_PATH
-    echo "Script de monitoramento criado com sucesso."
-}
+def main():
+    print("=== Configuração Datadog ===")
+    api_key, proxy, host_name = configure_datadog()
+    print("\nInicializando Datadog...")
+    initialize_datadog(api_key, proxy, host_name)
+    print("Coletando e enviando métricas para Datadog...\n")
+    
+    collect_and_send_metrics()
+    print("Métricas enviadas com sucesso!")
 
-# Criar serviço systemd
-create_service() {
-    echo "Criando serviço systemd em $SERVICE_FILE..."
-    cat <<EOF > $SERVICE_FILE
-[Unit]
-Description=Monitoring Script Service
-After=network.target
-
-[Service]
-ExecStart=$SCRIPT_PATH
-Restart=always
-EnvironmentFile=$CONFIG_FILE
-
-[Install]
-WantedBy=multi-user.target
-EOF
-    echo "Serviço systemd criado com sucesso."
-}
-
-# Inputs do usuário
-read -p "Digite sua API Key do Datadog: " API_KEY
-read -p "Digite o Datadog Site (ex.: datadoghq.com ou datadoghq.eu): " DATADOG_SITE
-read -p "Digite o nome do host (hostname): " HOSTNAME
-read -p "Digite o ambiente (env): " ENVIRONMENT
-read -p "Você vai usar um Datadog Proxy? (yes/no): " USE_PROXY
-
-if [ "$USE_PROXY" == "yes" ]; then
-    read -p "Qual o IP do seu proxy? " PROXY
-else
-    PROXY="no"
-fi
-
-# Criar arquivos
-create_config
-create_script
-create_service
-
-# Ativar e iniciar o serviço
-systemctl daemon-reload
-systemctl enable monitoring_script
-systemctl start monitoring_script
-
-echo "Script de monitoramento configurado e iniciado com sucesso!"
+if __name__ == "__main__":
+    main()
