@@ -19,9 +19,9 @@ spec:
         tags.datadoghq.com/env: sandbox
         tags.datadoghq.com/service: java-sandbox
         tags.datadoghq.com/version: v3
-   #     admission.datadoghq.com/enabled: "true"
-   #   annotations:
-   #     admission.datadoghq.com/java-lib.version: v1.35.0
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/java-lib.version: v1.35.0
     spec:
       containers:
       - name: java-sandbox

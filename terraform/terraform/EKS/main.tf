@@ -282,3 +282,60 @@ resource "aws_eks_node_group" "eks_node_group" {
     terraform  = "true"
   }
 }
+
+# Launch Template para o Node Group teste-datadog
+resource "aws_launch_template" "eks_node_launch_template_teste_datadog" {
+  name          = "eks-node-launch-template-teste-datadog"
+  image_id      = data.aws_ami.eks_worker.image_id
+  instance_type = "t3.medium"
+
+  user_data = base64encode(<<EOT
+#!/bin/bash
+/etc/eks/bootstrap.sh ${aws_eks_cluster.eks_sandbox_datadog.name} --kubelet-extra-args '--register-with-taints=app=datadog:NoSchedule'
+EOT
+  )
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "eks-node-teste-datadog"
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# Node Group teste-datadog
+resource "aws_eks_node_group" "eks_node_group_teste_datadog" {
+  cluster_name    = aws_eks_cluster.eks_sandbox_datadog.name
+  node_group_name = "teste-datadog"
+  node_role_arn   = aws_iam_role.eks_node_group_role.arn
+  subnet_ids      = [aws_subnet.eks_subnet_1.id, aws_subnet.eks_subnet_2.id]
+
+  scaling_config {
+    desired_size = 1
+    max_size     = 1
+    min_size     = 1
+  }
+
+  launch_template {
+    id      = aws_launch_template.eks_node_launch_template_teste_datadog.id
+    version = "$Latest"
+  }
+
+  tags = {
+    owner      = "Latam team"
+    created_by = "pedro schawirin"
+    env        = "sandbox"
+    terraform  = "true"
+    test_group = "teste-datadog"
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_worker_node_policy,
+    aws_iam_role_policy_attachment.eks_cni_policy,
+    aws_iam_role_policy_attachment.eks_ec2_container_registry_read_only
+  ]
+}
