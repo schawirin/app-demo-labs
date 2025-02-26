@@ -10,3 +10,9 @@ security-labs/vulnerability/
 .next/cache/
 *.zip
 >>>>>>> dev
+.DS_Store
+**/.DS_Store
+**/pg_control
+.DS_Store
+**/.DS_Store
+**/pg_control
