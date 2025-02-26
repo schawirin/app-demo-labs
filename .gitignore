@@ -1,2 +1,12 @@
 ecommerce_nextjs-lab/ecommerce_sanity_stripe/
 security-labs/vulnerability/
+<<<<<<< HEAD
+=======
+.terraform/
+.terraform/
+.next/cache/
+*.zip
+.terraform/
+.next/cache/
+*.zip
+>>>>>>> dev

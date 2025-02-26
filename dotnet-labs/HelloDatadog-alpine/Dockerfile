@@ -24,4 +24,8 @@ ENV ASPNETCORE_URLS=http://+:5000
 EXPOSE 5000
 
 # Configure o ponto de entrada para o aplicativo
+<<<<<<< HEAD
 ENTRYPOINT ["dotnet", "HelloDatadog.dll"]
+=======
+ENTRYPOINT ["dotnet", "HelloDatadog.dll"]
+>>>>>>> dev

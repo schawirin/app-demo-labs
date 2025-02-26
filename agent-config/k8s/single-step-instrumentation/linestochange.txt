@@ -1,0 +1,22 @@
+43-  apiKeyExistingSecret:  apikey
+
+ 108 - clusterName:  eks-sandbox
+
+ 453   -  enabled: true
+
+458  - containerCollectAll: true
+
+469 -     autoMultiLineDetection: true
+
+483 -     portEnabled: true
+
+ 689 -     processCollection: true
+
+826 - 832   networkMonitoring:
+    # datadog.networkMonitoring.enabled -- Enable network performance monitoring
+    enabled: true
+
+  serviceMonitoring:
+    # datadog.serviceMonitoring.enabled -- Enable Universal Service Monitoring
+    enabled: ture
+

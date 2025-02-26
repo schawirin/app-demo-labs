@@ -1,0 +1,165 @@
+### **README - FinOps Monitoring and Downtime**
+
+---
+
+#### **Project Overview**
+This project uses Terraform to create a monitoring infrastructure in Datadog, focusing on resource optimization for **on-premises** environments. The goal is to detect underutilized resources, set up alerts for such situations, and configure a **recurring downtime** outside business hours to avoid unnecessary alerts.
+
+---
+
+#### **Alerts Created**
+
+1. **Low CPU Utilization**  
+   - **Description**: Monitors hosts with CPU idleness above 80% for 30 minutes.
+   - **Action**: Sends an alert suggesting a workload review on the host.
+
+2. **High Memory Availability**  
+   - **Description**: Detects hosts with more than 80% available memory for 1 hour.
+   - **Action**: Alerts for potential resource allocation optimizations.
+
+3. **Low Disk Activity**  
+   - **Description**: Monitors hosts with disk utilization below 10% for 1 hour.
+   - **Action**: Alerts about possible disk underutilization.
+
+4. **Composite Monitor**  
+   - **Description**: Combines the three monitors above into a single alert.  
+   - **Action**: Triggers an alert if any of the above conditions are met.
+
+---
+
+#### **Recurring Downtime**
+
+- **Description**: Configures a recurring downtime schedule outside business hours (from 7 PM to 9 AM daily).  
+- **Objective**: Prevents alerts during nighttime, ensuring notifications are only sent during work hours.
+
+---
+
+#### **Key Features in the Code**
+
+1. **Monitors**
+   - Uses `datadog_monitor` to define alerts for CPU, memory, and disk.
+   - Queries Datadog metrics to identify underutilization patterns.
+
+2. **Composite Monitor**
+   - Implements `datadog_monitor` with the `composite` type to combine multiple monitors.
+
+3. **Recurring Downtime**
+   - Configured using `datadog_downtime_schedule`.
+   - Scope set to `team:finops-test` to apply only to relevant monitors.
+   - Daily recurrence silences alerts between 7 PM and 9 AM.
+
+---
+
+#### **How to Use**
+
+1. **Validate the Code**:
+   ```bash
+   terraform validate
+   ```
+
+2. **Plan the Changes**:
+   ```bash
+   terraform plan
+   ```
+
+3. **Apply the Configuration**:
+   ```bash
+   terraform apply
+   ```
+
+---
+
+#### **Tags Used**
+
+- **`team:finops-test`**: Identifies the monitors impacted by the downtime.
+- **`env:onprem`**: Indicates monitors are related to the on-premises environment.
+- **`resource:cpu`, `resource:memory`, `resource:disk`**: Differentiates the types of resources being monitored.
+
+---
+
+### **Contact**
+
+If you have any questions or need further improvements, feel free to reach out to the project maintainer. 🚀
+
+### **README - Monitoramento FinOps e Downtime- PT-BR**
+
+---
+
+#### **Descrição do Projeto**
+Este projeto utiliza o Terraform para criar uma infraestrutura de monitoramento no Datadog com foco em otimização de recursos para ambientes **on-premises**. O objetivo é identificar recursos subutilizados, criar alertas para essas situações e configurar um **downtime recorrente** fora do horário comercial, evitando alertas desnecessários.
+
+---
+
+#### **Alertas Criados**
+
+1. **Baixa Utilização de CPU**  
+   - **Descrição**: Monitora hosts que apresentam ociosidade de CPU acima de 80% por 30 minutos.
+   - **Ação**: Envia um alerta sugerindo revisão da carga de trabalho no host.
+
+2. **Alta Disponibilidade de Memória**  
+   - **Descrição**: Identifica hosts com mais de 80% de memória disponível por 1 hora.
+   - **Ação**: Alerta para possíveis otimizações na alocação de recursos.
+
+3. **Baixa Atividade de Disco**  
+   - **Descrição**: Monitora hosts com utilização de disco abaixo de 10% por 1 hora.
+   - **Ação**: Alerta sobre possíveis subutilizações de disco.
+
+4. **Monitor Composto**  
+   - **Descrição**: Combina os três monitores anteriores em um único alerta.  
+   - **Ação**: Dispara um alerta quando qualquer uma das condições acima for atendida.
+
+---
+
+#### **Downtime Recorrente**
+
+- **Descrição**: Configura um período recorrente de silêncio para os monitores fora do horário comercial (das 19h às 9h, diariamente).  
+- **Objetivo**: Evitar alertas durante a madrugada, garantindo que notificações sejam enviadas apenas no horário de trabalho.
+
+---
+
+#### **Principais Recursos no Código**
+
+1. **Monitores**
+   - Utiliza `datadog_monitor` para definir os alertas de CPU, memória e disco.
+   - Monitores configurados com queries Datadog para identificar padrões de subutilização.
+
+2. **Monitor Composto**
+   - Usa `datadog_monitor` com o tipo `composite` para combinar múltiplos monitores.
+
+3. **Downtime Recorrente**
+   - Implementado com `datadog_downtime_schedule`.
+   - Configuração de escopo com a tag `team:finops-test` para aplicar apenas aos monitores relevantes.
+   - Recorrência diária, silenciando alertas entre 19h e 9h.
+
+---
+
+#### **Como Usar**
+
+1. **Valide o Código**:
+   ```bash
+   terraform validate
+   ```
+
+2. **Planeje as Alterações**:
+   ```bash
+   terraform plan
+   ```
+
+3. **Aplique a Configuração**:
+   ```bash
+   terraform apply
+   ```
+
+---
+
+#### **Tags Utilizadas**
+
+- **`team:finops-test`**: Identifica os monitores que serão impactados pelo downtime.
+- **`env:onprem`**: Indica que os monitores estão relacionados ao ambiente on-premises.
+- **`resource:cpu`, `resource:memory`, `resource:disk`**: Diferencia os tipos de recursos monitorados.
+
+---
+
+### **Contato**
+
+Se houver dúvidas ou necessidade de melhorias, entre em contato com o responsável pelo projeto. 🚀

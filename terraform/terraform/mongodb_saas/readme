@@ -1,0 +1,1 @@
+mongosh "mongodb://dogboot:dogboot77@tf-20250203032156712100000001.c102aia0et2w.us-east-1.docdb.amazonaws.com:27017/?tls=true&tlsCAFile=/Users/pedro.schawirin/Documents/aws-key/global-bundle.pem&retryWrites=false"

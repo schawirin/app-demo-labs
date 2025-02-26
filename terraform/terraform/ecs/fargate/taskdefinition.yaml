@@ -1,0 +1,144 @@
+{
+    "family": "java-app",
+    "networkMode": "awsvpc",
+    "executionRoleArn": "arn:aws:iam::061039767542:role/ecsTaskExecutionRole",
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "512",
+    "memory": "1024",
+    "containerDefinitions": [
+        {
+            "name": "java-app",
+            "image": "schawirin/javasandbox:v1",
+            "cpu": 256,
+            "memory": 512,
+            "essential": true,
+            "portMappings": [
+                {
+                    "containerPort": 8080,
+                    "hostPort": 8080,
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "DD_APM_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_LOGS_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_LOGS_INJECTION",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_TRACE_AGENT_URL",
+                    "value": "http://127.0.0.1:8126"
+                },
+                {
+                    "name": "DD_ENV",
+                    "value": "production"
+                },
+                {
+                    "name": "DD_SERVICE",
+                    "value": "my-java-app"
+                },
+                {
+                    "name": "DD_VERSION",
+                    "value": "1.0"
+                },
+                {
+                    "name": "DD_API_KEY",
+                    "value": "04ebf9928ae0fc45888af330a2300e03"
+                },
+                {
+                    "name": "DD_SITE",
+                    "value": "datadoghq.com"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awsfirelens",
+                "options": {
+                    "Name": "datadog",
+                    "Host": "http-intake.logs.datadoghq.com",
+                    "TLS": "on",
+                    "dd_service": "my-java-app",
+                    "dd_source": "java",
+                    "dd_tags": "env:production",
+                    "dd_message_key": "log",
+                    "provider": "ecs",
+                    "apikey": "04ebf9928ae0fc45888af330a2300e03"
+                }
+            }
+        },
+        {
+            "name": "datadog-agent",
+            "image": "public.ecr.aws/datadog/agent:latest",
+            "cpu": 128,
+            "memory": 256,
+            "essential": false,
+            "environment": [
+                {
+                    "name": "DD_APM_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_LOGS_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_ENV",
+                    "value": "production"
+                },
+                {
+                    "name": "DD_SERVICE",
+                    "value": "datadog-agent"
+                },
+                {
+                    "name": "DD_VERSION",
+                    "value": "1.0"
+                },
+                {
+                    "name": "DD_API_KEY",
+                    "value": "04ebf9928ae0fc45888af330a2300e03"
+                },
+                {
+                    "name": "DD_SITE",
+                    "value": "datadoghq.com"
+                },
+                {
+                    "name": "DD_APM_RECEIVER_PORT",
+                    "value": "8126"
+                },
+                {
+                    "name": "ECS_FARGATE",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_BIND_HOST",
+                    "value": "localhost"
+                }
+            ]
+        },
+        {
+            "name": "log_router",
+            "image": "public.ecr.aws/aws-observability/aws-for-fluent-bit:stable",
+            "cpu": 128,
+            "memory": 256,
+            "essential": true,
+            "firelensConfiguration": {
+                "type": "fluentbit"
+            },
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/ecs-aws-firelens-sidecar-container",
+                    "awslogs-create-group": "true",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "firelens"
+                }
+            }
+        }
+    ]
+}

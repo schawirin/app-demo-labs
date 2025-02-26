@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  chatbot_db:
+    build: .
+    container_name: chatbot_db_container
+    volumes:
+      - ./data:/app/data  # Agora montamos um diretório corretamente
+    stdin_open: true
+    tty: true
