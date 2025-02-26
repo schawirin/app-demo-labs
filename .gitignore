@@ -1,3 +1,6 @@
 ecommerce_nextjs-lab/ecommerce_sanity_stripe/
 security-labs/vulnerability/
 .terraform/
+.terraform/
+.next/cache/
+*.zip
