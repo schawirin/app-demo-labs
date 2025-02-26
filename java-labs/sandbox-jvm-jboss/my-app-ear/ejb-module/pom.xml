@@ -1,0 +1,39 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  
+  <parent>
+    <groupId>com.example</groupId>
+    <artifactId>my-app-ear</artifactId>
+    <version>1.0.0</version>
+  </parent>
+  
+  <artifactId>ejb-module</artifactId>
+  <packaging>ejb</packaging>
+  
+  <dependencies>
+    <!-- Dependência do Java EE API (contém as classes do pacote javax.ejb, etc.) -->
+    <dependency>
+      <groupId>javax</groupId>
+      <artifactId>javaee-api</artifactId>
+      <version>8.0</version>
+      <scope>provided</scope>
+    </dependency>
+    
+    <!-- IBM MQ JMS Client -->
+    <dependency>
+      <groupId>com.ibm.mq</groupId>
+      <artifactId>com.ibm.mq.allclient</artifactId>
+      <version>9.3.3.0</version>
+    </dependency>
+    
+    <!-- Logger do JBoss (opcional) -->
+    <dependency>
+      <groupId>org.jboss.logging</groupId>
+      <artifactId>jboss-logging</artifactId>
+      <version>3.4.1.Final</version>
+    </dependency>
+  </dependencies>
+</project>

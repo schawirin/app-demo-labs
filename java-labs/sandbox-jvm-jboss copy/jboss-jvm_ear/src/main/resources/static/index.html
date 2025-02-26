@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datadog Sandbox Java</title>
+    <style>
+        body {
+            background: linear-gradient(to right, #8E2DE2, #4A00E0);
+            font-family: Arial, sans-serif;
+            color: #fff;
+            text-align: center;
+            margin-top: 50px;
+        }
+        h1 {
+            color: #fff;
+            font-size: 36px;
+            margin-bottom: 40px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            margin: 20px;
+            cursor: pointer;
+            background-color: #512DA8;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #673AB7;
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 24px;
+            color: #FFD700;
+        }
+        img {
+            width: 150px;
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+    <img src="/img/datadog-logo.png" alt="Datadog Logo">
+    <h1>Datadog Sandbox Java</h1>
+    <button onclick="produceMessage()">Produce Message</button>
+    <button onclick="consumeMessage()">Consume Message</button>
+    <div id="message"></div>
+
+    <script>
+        function produceMessage() {
+            fetch('/jboss-jvm-1.0-SNAPSHOT/produce')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('message').textContent = data;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function consumeMessage() {
+            fetch('/jboss-jvm-1.0-SNAPSHOT/consume')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('message').textContent = data;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

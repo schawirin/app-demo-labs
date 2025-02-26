@@ -1,3 +1,11 @@
 {
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.compile.nullAnalysis.mode": "automatic",
+    "datadog.ust.service.setup.linkedNames": [
+        "agent",
+        "app.war",
+        "java-sandbox",
+        "log4jhotpatch",
+        "meu_chatbot"
+    ]
 }

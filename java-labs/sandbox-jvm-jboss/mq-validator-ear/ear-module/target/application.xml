@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/application_7.xsd" version="7">
+  <application-name>mq-validator-app</application-name>
+  <display-name>mq-validator-ear</display-name>
+  <initialize-in-order>true</initialize-in-order>
+  <module>
+    <ejb>com.company-mq-validator-ejb-1.0.0.jar</ejb>
+  </module>
+  <module>
+    <java>org.bouncycastle-bcutil-jdk15to18-1.72.jar</java>
+  </module>
+  <module>
+    <java>com.fasterxml.jackson.core-jackson-databind-2.15.0.jar</java>
+  </module>
+  <module>
+    <java>com.fasterxml.jackson.core-jackson-core-2.15.0.jar</java>
+  </module>
+  <module>
+    <java>com.fasterxml.jackson.core-jackson-annotations-2.15.0.jar</java>
+  </module>
+</application>

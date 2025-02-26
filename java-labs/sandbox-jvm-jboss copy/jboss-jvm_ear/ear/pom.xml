@@ -1,0 +1,47 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>com.project</groupId>
+        <artifactId>consumer-producer-ear</artifactId>
+        <version>2.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>consumer-producer-ear</artifactId>
+    <packaging>ear</packaging>
+    <name>Consumer Producer EAR Module</name>
+
+    <dependencies>
+        <!-- Dependency for the WAR module -->
+        <dependency>
+            <groupId>com.project</groupId>
+            <artifactId>consumer-producer</artifactId>
+            <version>2.0</version>
+            <type>war</type>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>consumer-producer-ear</finalName>
+        <plugins>
+            <!-- Maven EAR Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ear-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <modules>
+                        <webModule>
+                            <groupId>com.project</groupId>
+                            <artifactId>consumer-producer</artifactId>
+                            <contextRoot>/</contextRoot>
+                        </webModule>
+                    </modules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

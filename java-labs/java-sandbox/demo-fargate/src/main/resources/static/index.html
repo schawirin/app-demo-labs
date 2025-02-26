@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datadog Sandbox Java</title>
+    <style>
+        body {
+            background: linear-gradient(to right, #8E2DE2, #4A00E0); /* Gradiente roxo como no site da Datadog */
+            font-family: Arial, sans-serif;
+            color: #fff;
+            text-align: center;
+            margin-top: 50px;
+        }
+        h1 {
+            color: #fff;
+            font-size: 36px;
+            margin-bottom: 40px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            margin: 20px;
+            cursor: pointer;
+            background-color: #512DA8; /* Cor de fundo dos botões */
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #673AB7; /* Cor de fundo ao passar o mouse */
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 24px;
+            color: #FFD700; /* Cor do texto de feedback */
+        }
+        img {
+            width: 150px;
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+    <img src="/img/datadog-logo.png" alt="Datadog Logo">
+    <h1>Datadog Sandbox Java</h1>
+    <button onclick="createTrace()">Let's Go Trace</button>
+    <button onclick="createLogs()">Let's Go Logs</button>
+    <div id="message"></div>
+
+    <script>
+        function createTrace() {
+            fetch('/trace')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('message').textContent = data;
+                });
+        }
+
+        function createLogs() {
+            fetch('/logs')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('message').textContent = data;
+                });
+        }
+    </script>
+</body>
+</html>

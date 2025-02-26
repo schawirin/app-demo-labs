@@ -1,0 +1,11 @@
+<jboss xmlns="urn:jboss:1.0">
+    <resource-adapter-ref resource-adapter-name="wmq.jmsra.rar"/>
+    
+    <default-bindings 
+        context-service="java:jboss/ee/concurrency/context/default"
+        datasource="java:jboss/datasources/ExampleDS"
+        jms-connection-factory="java:jboss/DefaultJMSConnectionFactory"
+        managed-executor-service="java:jboss/ee/concurrency/executor/default"
+        managed-scheduled-executor-service="java:jboss/ee/concurrency/scheduler/default"
+        managed-thread-factory="java:jboss/ee/concurrency/factory/default"/>
+</jboss>

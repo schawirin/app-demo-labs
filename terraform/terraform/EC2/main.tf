@@ -41,7 +41,7 @@ data "aws_ami" "amazon_linux" {
 
 # Security Group para a Instância EC2
 resource "aws_security_group" "docker_lab_sg" {
-  name        = "docker-lab-sg"
+  name        = "ocker-lab-sg-v1"
   description = "Security group for Docker Lab EC2 instance"
   vpc_id      = data.aws_vpc.default.id
 
@@ -50,7 +50,7 @@ resource "aws_security_group" "docker_lab_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["seu_ip/32"]
+    cidr_blocks = ["203.0.113.5/32"]
   }
 
   egress {
@@ -61,7 +61,7 @@ resource "aws_security_group" "docker_lab_sg" {
   }
 
   tags = {
-    Name       = "docker-lab-sg"
+    Name       = "ocker-lab-sg-v1"
     owner      = "Latam team"
     created_by = "Pedro Schawirin"
     env        = "sandbox"
@@ -100,7 +100,7 @@ resource "aws_instance" "docker_lab" {
               EOF
 
   # Substitua "sua-chave-ssh" pelo nome da sua chave SSH
-  key_name = "sua-chave-ssh"
+  key_name = "se-admin"
 
   vpc_security_group_ids = [aws_security_group.docker_lab_sg.id]
 
