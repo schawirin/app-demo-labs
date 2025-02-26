@@ -4,3 +4,6 @@ security-labs/vulnerability/
 .terraform/
 .next/cache/
 *.zip
+.terraform/
+.next/cache/
+*.zip
