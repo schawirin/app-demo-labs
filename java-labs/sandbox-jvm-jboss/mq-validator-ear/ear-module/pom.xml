@@ -1,0 +1,126 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.company</groupId>
+        <artifactId>parent-project</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>mq-validator-ear</artifactId>
+    <packaging>ear</packaging>
+
+    <dependencies>
+        <!-- Módulo EJB -->
+        <dependency>
+            <groupId>com.company</groupId>
+            <artifactId>mq-validator-ejb</artifactId>
+            <version>${project.version}</version>
+            <type>ejb</type>
+        </dependency>
+
+        <!-- IBM MQ Client -->
+        <dependency>
+            <groupId>com.ibm.mq</groupId>
+            <artifactId>com.ibm.mq.allclient</artifactId>
+            <version>9.3.3.0</version>
+        </dependency>
+
+        <!-- BouncyCastle -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15to18</artifactId>
+            <version>1.72</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15to18</artifactId>
+            <version>1.72</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcutil-jdk15to18</artifactId>
+            <version>1.72</version>
+        </dependency>
+
+        <!-- Jackson -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.15.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.15.0</version>
+        </dependency>
+
+        <!-- JSON -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20230227</version>
+        </dependency>
+
+        <!-- JMS API (se necessário) -->
+        <dependency>
+            <groupId>javax.jms</groupId>
+            <artifactId>javax.jms-api</artifactId>
+            <version>2.0.1</version>
+            <scope>provided</scope> <!-- Se o JBoss já fornecer -->
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ear-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <applicationName>mq-validator-app</applicationName>
+                    <initializeInOrder>true</initializeInOrder>
+                    <includeLibInApplicationXml>true</includeLibInApplicationXml>
+                    <modules>
+                        <!-- Módulo EJB -->
+                        <ejbModule>
+                            <groupId>com.company</groupId>
+                            <artifactId>mq-validator-ejb</artifactId>
+                        </ejbModule>
+
+                        <!-- Bibliotecas -->
+                        <jarModule>
+                            <groupId>com.ibm.mq</groupId>
+                            <artifactId>com.ibm.mq.allclient</artifactId>
+                            <bundleDir>lib</bundleDir>
+                        </jarModule>
+                        <jarModule>
+                            <groupId>org.bouncycastle</groupId>
+                            <artifactId>bcprov-jdk15to18</artifactId>
+                            <bundleDir>lib</bundleDir>
+                        </jarModule>
+                        <jarModule>
+                            <groupId>org.bouncycastle</groupId>
+                            <artifactId>bcpkix-jdk15to18</artifactId>
+                            <bundleDir>lib</bundleDir>
+                        </jarModule>
+                        <jarModule>
+                            <groupId>org.json</groupId>
+                            <artifactId>json</artifactId>
+                            <bundleDir>lib</bundleDir>
+                        </jarModule>
+                        <!-- Adicione outras bibliotecas conforme necessário -->
+                    </modules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

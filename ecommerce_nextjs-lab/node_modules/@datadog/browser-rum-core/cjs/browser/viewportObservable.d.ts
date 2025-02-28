@@ -1,0 +1,9 @@
+import { Observable } from '@datadog/browser-core';
+import type { RumConfiguration } from '../domain/configuration';
+export interface ViewportDimension {
+    height: number;
+    width: number;
+}
+export declare function initViewportObservable(configuration: RumConfiguration): Observable<ViewportDimension>;
+export declare function createViewportObservable(configuration: RumConfiguration): Observable<ViewportDimension>;
+export declare function getViewportDimension(): ViewportDimension;

@@ -1,0 +1,59 @@
+version: '3.8'
+services:
+  chroma-db:
+    image: schawirin/chatbot_langchain-vector-db:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./vector-db/data:/data
+
+  langchain-service:
+    image: schawirin/chatbot_langchain-langchain-service:latest
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DD_API_KEY=${DD_API_KEY}
+      - DD_SERVICE=langchain-service
+      - DD_ENV=local
+      - DD_LOGS_INJECTION=true
+      - DD_OPENAI_LLMOBS=1
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - ./documents:/app/documents
+    ports:
+      - "8002:8000"
+    depends_on:
+      - chroma-db
+      - redis
+
+  api-gateway:
+    image: schawirin/chatbot_langchain-api-gateway:latest
+    environment:
+      - DD_API_KEY=${DD_API_KEY}
+      - DD_SERVICE=api-gateway
+      - DD_ENV=local
+      - DD_LOGS_INJECTION=true
+    ports:
+      - "8001:8000"
+    depends_on:
+      - langchain-service
+
+  whatsapp-service:
+    image: schawirin/chatbot_whatsapp-service:latest
+    environment:
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - "8003:8000"
+    depends_on:
+      - langchain-service
+      - redis
+
+  redis:
+    image: redis:6.2
+    container_name: redis_container
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]

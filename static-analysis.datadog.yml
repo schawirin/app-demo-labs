@@ -1,0 +1,21 @@
+schema-version: v1
+rulesets:
+  - java-best-practices
+  - java-code-style
+  - java-security
+  - javascript-best-practices
+  - javascript-browser-security
+  - javascript-code-style
+  - javascript-common-security
+  - javascript-express
+  - javascript-inclusive
+  - javascript-node-security
+  - jsx-react
+  - python-best-practices
+  - python-code-style
+  - python-django
+  - python-flask
+  - python-inclusive
+  - python-pandas
+  - python-security
+  - docker-best-practices

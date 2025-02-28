@@ -1,0 +1,11 @@
+<jboss-deployment-structure>
+    <deployment>
+        <exclusions>
+            <!-- Exclui dependências que não precisam de CDI -->
+            <module name="com.ibm.mq" />
+            <module name="org.bouncycastle" />
+            <module name="javax.jms.api" />
+            <module name="org.json" />
+        </exclusions>
+    </deployment>
+</jboss-deployment-structure>
