@@ -1,0 +1,205 @@
+
+
+
+Segue um exemplo de documentação que você pode adicionar ao seu README para explicar cada módulo do projeto DogBank, com uma breve descrição de suas funções e a localização dos principais arquivos Java:
+
+---
+
+## Estrutura do Projeto DogBank
+
+O projeto DogBank é organizado como um projeto multi-módulo Maven, onde cada módulo tem uma responsabilidade específica. Abaixo, você encontra uma descrição resumida de cada módulo e os principais arquivos com seus diretórios.
+
+### 1. **auth-module**  
+**Função:**  
+Gerencia a autenticação dos usuários. Este módulo inclui endpoints REST para login, configurações de segurança (usando Spring Security) e DTOs para as requisições de autenticação.
+
+**Principais Arquivos:**
+- **`auth-module/pom.xml`**  
+  Define as dependências e configurações específicas para o módulo de autenticação.
+- **`auth-module/src/main/java/com/dogbank/auth/AuthModuleApplication.java`**  
+  Classe principal para iniciar a aplicação do módulo de autenticação.
+- **`auth-module/src/main/java/com/dogbank/auth/config/SecurityConfig.java`**  
+  Configuração do Spring Security que define regras de acesso e libera o endpoint de login.
+- **`auth-module/src/main/java/com/dogbank/auth/controller/AuthController.java`**  
+  Exposição do endpoint de login (`/api/auth/login`).  
+- **`auth-module/src/main/java/com/dogbank/auth/dto/AuthRequest.java`**  
+  DTO que encapsula os dados de login (usuário e senha).
+
+---
+
+### 2. **account-module**  
+**Função:**  
+Responsável pela gestão de contas bancárias. Permite criar, consultar e atualizar informações das contas (como número da conta, saldo e associação ao usuário).
+
+**Principais Arquivos:**
+- **`account-module/pom.xml`**  
+  Define as dependências (incluindo Spring Boot Starter Web, Data JPA, PostgreSQL e Log4j2) para este módulo.
+- **`account-module/src/main/java/com/dogbank/account/entity/Account.java`**  
+  Entidade JPA que representa uma conta.  
+  **Local:** `account-module/src/main/java/com/dogbank/account/entity/Account.java`
+- **`account-module/src/main/java/com/dogbank/account/repository/AccountRepository.java`**  
+  Interface de repositório que fornece operações CRUD para a entidade Account.
+- **`account-module/src/main/java/com/dogbank/account/service/AccountService.java`**  
+  Lógica de negócio para manipulação de contas (criação, consulta, atualização de saldo, etc.).
+- **`account-module/src/main/java/com/dogbank/account/controller/AccountController.java`**  
+  Endpoints REST para expor as operações de contas (GET, POST, PUT).
+
+---
+
+### 3. **transaction-module**  
+**Função:**  
+Simula transações financeiras, como transferências PIX. Esse módulo processa e persiste as transações realizadas, permitindo registrar o valor, as contas de origem e destino, e o horário da transação.
+
+**Principais Arquivos:**
+- **`transaction-module/pom.xml`**  
+  Configura as dependências necessárias (Spring Boot Starter Web, Data JPA, PostgreSQL e Log4j2).
+- **`transaction-module/src/main/java/com/dogbank/transaction/TransactionModuleApplication.java`**  
+  Classe principal para iniciar o módulo de transações.
+- **`transaction-module/src/main/java/com/dogbank/transaction/entity/Transaction.java`**  
+  Entidade JPA que representa uma transação.  
+  **Local:** `transaction-module/src/main/java/com/dogbank/transaction/entity/Transaction.java`
+- **`transaction-module/src/main/java/com/dogbank/transaction/repository/TransactionRepository.java`**  
+  Interface de repositório para operações com a entidade Transaction.
+- **`transaction-module/src/main/java/com/dogbank/transaction/dto/TransactionRequest.java`**  
+  DTO para receber os dados da requisição de transação (contas de origem/destino, valor, etc.).
+- **`transaction-module/src/main/java/com/dogbank/transaction/dto/TransactionResponse.java`**  
+  DTO para enviar a resposta após a transação.
+- **`transaction-module/src/main/java/com/dogbank/transaction/service/TransactionService.java`**  
+  Lógica de negócio para processar transações (persistência e geração de resposta).
+- **`transaction-module/src/main/java/com/dogbank/transaction/controller/TransactionController.java`**  
+  Exposição dos endpoints REST para executar transações (`/api/transactions`).
+
+---
+
+### 4. **integration-module**  
+**Função:**  
+Simula a integração com sistemas externos, como a comunicação com o sistema PIX. Esse módulo pode ser expandido para realizar chamadas reais a serviços externos usando `RestTemplate` ou `WebClient`.
+
+**Principais Arquivos:**
+- **`integration-module/pom.xml`**  
+  Define as dependências (Spring Boot Starter Web e Log4j2) e configura a main class para o módulo.
+- **`integration-module/src/main/java/com/dogbank/integration/IntegrationModuleApplication.java`**  
+  Classe principal para iniciar o módulo de integração.
+- **`integration-module/src/main/java/com/dogbank/integration/service/ExternalIntegrationService.java`**  
+  Serviço que simula a integração com um sistema externo, retornando uma resposta simulada.
+- **`integration-module/src/main/java/com/dogbank/integration/controller/IntegrationController.java`**  
+  Endpoint REST que expõe a funcionalidade de simulação de integração (por exemplo, `/api/integration/pix`).
+
+---
+
+### 5. **notification-module**  
+**Função:**  
+Responsável pelo envio de notificações, como alertas sobre transações ou atividades na conta. Pode simular notificações via e-mail, SMS ou outros canais, e utiliza logs para demonstrar o envio.
+
+**Principais Arquivos:**
+- **`notification-module/pom.xml`**  
+  Configura as dependências (Spring Boot Starter Web e Log4j2) para o módulo de notificações.
+- **`notification-module/src/main/java/com/dogbank/notification/NotificationModuleApplication.java`**  
+  Classe principal para iniciar o módulo de notificações.
+- **`notification-module/src/main/java/com/dogbank/notification/service/NotificationService.java`**  
+  Serviço que simula o envio de notificações e registra a ação via logs.
+- **`notification-module/src/main/java/com/dogbank/notification/controller/NotificationController.java`**  
+  Exposição de endpoints REST para disparar notificações (por exemplo, `/api/notifications`).
+
+---
+
+## Resumo da Estrutura de Diretórios
+
+```
+dogbank/
+├── pom.xml                # POM raiz do projeto
+├── auth-module/
+│   ├── pom.xml            # POM do auth-module
+│   └── src/main/java/com/dogbank/auth/...
+├── account-module/
+│   ├── pom.xml            # POM do account-module
+│   └── src/main/java/com/dogbank/account/...
+├── transaction-module/
+│   ├── pom.xml            # POM do transaction-module
+│   └── src/main/java/com/dogbank/transaction/...
+├── integration-module/
+│   ├── pom.xml            # POM do integration-module
+│   └── src/main/java/com/dogbank/integration/...
+└── notification-module/
+    ├── pom.xml            # POM do notification-module
+    └── src/main/java/com/dogbank/notification/...
+```
+
+Cada módulo possui seu próprio `pom.xml` e uma estrutura de diretórios organizada por pacote, facilitando a manutenção e a futura migração para microserviços.
+
+
+
+#### set up DB postgress docker local
+
+mkdir -p ~/docker/pgdata
+
+docker run --name dogbank \
+  -e POSTGRES_USER=dogbank \
+  -e POSTGRES_PASSWORD=dog1234 \
+  -e POSTGRES_DB=banco_db \
+  -v ~/docker/pgdata:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  -d postgres:14
+
+
+### create tables
+-- Tabela de Usuários
+-- Tabela de Usuários com chave_pix (pode conter o email ou o CPF)
+CREATE TABLE usuarios (
+    id SERIAL PRIMARY KEY,
+    login VARCHAR(50) NOT NULL UNIQUE,
+    senha VARCHAR(100) NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    cpf VARCHAR(11) NOT NULL UNIQUE,
+    chave_pix VARCHAR(100) NOT NULL UNIQUE,  -- Pode ser o email ou o CPF do usuário
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Contas (relacionada ao usuário)
+CREATE TABLE contas (
+    id SERIAL PRIMARY KEY,
+    usuario_id INTEGER NOT NULL,
+    numero_conta VARCHAR(20) NOT NULL UNIQUE,
+    saldo NUMERIC(12,2) NOT NULL DEFAULT 0,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+);
+
+-- Tabela de Transações PIX (para registrar as transferências)
+CREATE TABLE transacoes_pix (
+    id SERIAL PRIMARY KEY,
+    conta_origem INTEGER NOT NULL,
+    conta_destino INTEGER NOT NULL,
+    valor_transacionado NUMERIC(12,2) NOT NULL DEFAULT 0,
+    chave_pix_destino VARCHAR(100) NOT NULL,  -- Chave PIX do destinatário
+    data_transacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (conta_origem) REFERENCES contas(id),
+    FOREIGN KEY (conta_destino) REFERENCES contas(id)
+);
+
+
+## insert 
+
+-- Inserir usuários
+-- Inserindo 10 usuários fictícios
+
+INSERT INTO usuarios (login, senha, nome, email, cpf, chave_pix)
+VALUES
+('julia_login', 'hash_da_senha', 'Julia', 'julia@example.com', '11122233344', 'julia@example.com'),
+('maria_login', 'hash_da_senha', 'Maria', 'maria@example.com', '22233344455', 'maria@example.com'),
+('eliane_login', 'hash_da_senha', 'Eliane', 'eliane@example.com', '33344455566', 'eliane@example.com'),
+('emiliano_login', 'hash_da_senha', 'Emiliano', 'emiliano@example.com', '44455566677', 'emiliano@example.com'),
+('bianca_login', 'hash_da_senha', 'Bianca', 'bianca@example.com', '55566677788', 'bianca@example.com'),
+('gustavo_login', 'hash_da_senha', 'Gustavo', 'gustavo@example.com', '66677788899', 'gustavo@example.com'),
+('jonathan_login', 'hash_da_senha', 'Jonathan', 'jonathan@example.com', '77788899900', 'jonathan@example.com'),
+('roberto_login', 'hash_da_senha', 'Roberto', 'roberto@example.com', '88899900111', 'roberto@example.com'),
+('camila_login', 'hash_da_senha', 'Camila', 'camila@example.com', '99900111222', 'camila@example.com'),
+('fernando_login', 'hash_da_senha', 'Fernando', 'fernando@example.com', '00111222333', 'fernando@example.com');
+
+
+-- Inserir contas associadas aos usuários
+-- A conta do Pedro terá saldo de 10.000,00 e a do João inicia com 0,00
+INSERT INTO contas (usuario_id, numero_conta, saldo)
+VALUES
+((SELECT id FROM usuarios WHERE login = 'pedro_login'), '001-123456', 10000.00),
+((SELECT id FROM usuarios WHERE login = 'joao_login'), '002-654321', 0.00);
