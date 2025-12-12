@@ -1,0 +1,41 @@
+# Terraform variables - Copie para terraform.tfvars e preencha
+
+# AWS Configuration
+aws_region = "us-east-1"
+
+# Lambda Configuration
+function_name = "datadog-apm-lab-python"
+runtime       = "python3.12"
+memory_size   = 512
+timeout       = 30
+
+# Datadog Configuration
+datadog_api_key = "your_datadog_api_key_here"
+datadog_site    = "datadoghq.com"  # ou datadoghq.eu, us3.datadoghq.com, etc
+
+dd_env     = "lab"
+dd_service = "lambda-python-lab"
+dd_version = "1.0.0"
+
+dd_trace_enabled  = true
+dd_logs_injection = true
+
+# Datadog Lambda Layers
+# Obtenha os ARNs mais recentes em: https://docs.datadoghq.com/serverless/libraries_integrations/extension/
+#
+# Para US-EAST-1 (Python 3.12):
+# Extension: arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Extension:XX
+# Python:    arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Python312:XX
+#
+# Substitua XX pela versão mais recente (ver link acima)
+
+datadog_extension_layer_arn = "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Extension:62"
+datadog_python_layer_arn    = "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Python312:106"
+
+# Tags
+tags = {
+  Project     = "Datadog-APM-Lab"
+  Environment = "lab"
+  ManagedBy   = "Terraform"
+  Owner       = "seu-nome"
+}
