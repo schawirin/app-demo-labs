@@ -1,0 +1,41 @@
+registry: "docker.io/datadog"
+datadog:
+  apiKeyExistingSecret: "datadog-secret"
+  site: "datadoghq.com"
+  clusterName: "eks-sandbox"
+  containerExclude: "name:*agent* name:*cluster-agent* name:*java*"
+  tags:
+    - "env:sandbox"
+  apm: 
+    instrumentation:
+      enabled: true
+      libVersions:
+        java: "1"
+
+  logs:
+    enabled: true
+    containerCollectAll: true
+   #containerExcludeLogs: "name:*java* image:agent image:cluster-agent"
+    logLevel: DEBUG
+    excludePauseContainer: false
+  asm:
+    threats:
+      enabled: true
+    sca:
+      enabled: true
+    iast:
+      enabled: true
+  securityAgent:
+    runtime:
+      enabled: true
+    compliance:
+      enabled: true
+  sbom:
+    containerImage:
+      enabled: true
+    host:
+      enabled: true
+  serviceMonitoring:
+    enabled: true
+  networkMonitoring:
+    enabled: true

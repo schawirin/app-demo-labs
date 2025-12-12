@@ -1,0 +1,4 @@
+com/dogbank/auth/config/SecurityConfig.class
+com/dogbank/auth/AuthModuleApplication.class
+com/dogbank/auth/dto/AuthRequest.class
+com/dogbank/auth/controller/AuthController.class

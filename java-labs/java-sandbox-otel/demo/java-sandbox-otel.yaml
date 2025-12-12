@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-sandbox-otel-ddagent
+  namespace: otel
+  labels:
+    app: java-sandbox-otel-ddagent
+    tags.datadoghq.com/env: otl
+    tags.datadoghq.com/service: java-sandbox-otel-ddagent
+    tags.datadoghq.com/version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: java-sandbox-otel-ddagent
+  template:
+    metadata:
+      labels:
+        app: java-sandbox-otel-ddagent
+        tags.datadoghq.com/env: otl
+        tags.datadoghq.com/service: java-sandbox-otel-ddagent
+        tags.datadoghq.com/version: v1
+    spec:
+      containers:
+        - name: java-sandbox-otel-ddagent
+          image: schawirin/java-sandbox-otel:v2
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector:4317"
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: "service.name=java-sandbox-otel-ddagent,env=otl,version=v1"
+
+---
+# Service da Aplicação Java
+apiVersion: v1
+kind: Service
+metadata:
+  name: java-sandbox-otel-ddagent
+  namespace: otel
+  labels:
+    app: java-sandbox-otel-ddagent
+spec:
+  selector:
+    app: java-sandbox-otel-ddagent
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP

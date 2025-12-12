@@ -1,0 +1,5 @@
+export { DefaultPrivacyLevel, TraceContextInjection, validateAndBuildConfiguration, serializeConfiguration, } from './configuration';
+export { createEndpointBuilder } from './endpointBuilder';
+export * from './intakeSites';
+export { computeTransportConfiguration } from './transportConfiguration';
+//# sourceMappingURL=index.js.map

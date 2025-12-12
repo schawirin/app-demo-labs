@@ -1,0 +1,28 @@
+{
+  "action": "process_order",
+  "data": {
+    "order_id": "ORD-12345",
+    "customer_id": "CUST-789",
+    "items": [
+      {
+        "product_id": "PROD-001",
+        "name": "Laptop",
+        "price": 1299.99,
+        "quantity": 1
+      },
+      {
+        "product_id": "PROD-002",
+        "name": "Mouse",
+        "price": 29.99,
+        "quantity": 2
+      },
+      {
+        "product_id": "PROD-003",
+        "name": "Keyboard",
+        "price": 89.99,
+        "quantity": 1
+      }
+    ],
+    "simulate_delay": 0
+  }
+}

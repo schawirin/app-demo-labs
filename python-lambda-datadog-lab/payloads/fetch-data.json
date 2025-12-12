@@ -1,0 +1,6 @@
+{
+  "action": "fetch_data",
+  "data": {
+    "url": "https://httpbin.org/json"
+  }
+}

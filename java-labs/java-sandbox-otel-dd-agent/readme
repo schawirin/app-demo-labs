@@ -1,0 +1,294 @@
+# README - Configuração do OpenTelemetry com Datadog
+
+Este documento fornece instruções simples e claras sobre:
+
+- Onde adicionar a configuração para a aplicação enviar dados de telemetria para o OpenTelemetry.
+- Como fazer o deploy e configurar o OpenTelemetry Collector.
+- Como configurar o Datadog Agent para receber a telemetria.
+
+---
+
+## Sumário
+
+1. [Configuração da Aplicação](#1-configuração-da-aplicação)
+2. [Deploy e Configuração do OpenTelemetry Collector](#2-deploy-e-configuração-do-opentelemetry-collector)
+3. [Configuração do Datadog Agent para Receber Telemetria](#3-configuração-do-datadog-agent-para-receber-telemetria)
+
+---
+
+## 1. Configuração da Aplicação
+
+### Passo 1: Adicionar Dependências do OpenTelemetry
+
+No arquivo `pom.xml` da sua aplicação Java, adicione as seguintes dependências:
+
+```xml
+<dependencies>
+    <!-- OpenTelemetry API -->
+    <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-api</artifactId>
+        <version>1.28.0</version>
+    </dependency>
+
+    <!-- OpenTelemetry SDK -->
+    <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-sdk</artifactId>
+        <version>1.28.0</version>
+    </dependency>
+
+    <!-- OpenTelemetry Exporter OTLP -->
+    <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-exporter-otlp</artifactId>
+        <version>1.28.0</version>
+    </dependency>
+</dependencies>
+```
+
+### Passo 2: Configurar o Endpoint do OpenTelemetry na Aplicação
+
+No código da sua aplicação, configure o endpoint do OpenTelemetry Collector. Por exemplo, crie uma classe `OpenTelemetryConfig.java` com o seguinte conteúdo:
+
+```java
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+
+public class OpenTelemetryConfig {
+
+    public static OpenTelemetry initializeOpenTelemetry() {
+        // Configura o exportador OTLP para enviar dados para o Collector
+        OtlpGrpcSpanExporter spanExporter = OtlpGrpcSpanExporter.builder()
+                .setEndpoint("http://otel-collector:4317")
+                .build();
+
+        // Configura o provedor de rastreamento com o exportador
+        SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
+                .addSpanProcessor(BatchSpanProcessor.builder(spanExporter).build())
+                .build();
+
+        // Constrói o OpenTelemetry com o provedor de rastreamento
+        return OpenTelemetrySdk.builder()
+                .setTracerProvider(tracerProvider)
+                .build();
+    }
+}
+```
+
+### Passo 3: Definir Variáveis de Ambiente (Opcional)
+
+Alternativamente, você pode configurar o endpoint e atributos usando variáveis de ambiente no Deployment Kubernetes da sua aplicação:
+
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "http://otel-collector:4317"
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: "service.name=java-sandbox-otel-ddagent,env=otl,version=v1"
+```
+
+Isso garante que a aplicação saiba para onde enviar os dados de telemetria e quais atributos incluir.
+
+---
+
+## 2. Deploy e Configuração do OpenTelemetry Collector
+
+### Passo 1: Criar o ConfigMap com a Configuração do Collector
+
+Crie um arquivo YAML chamado `otel-collector.yaml` com o seguinte conteúdo:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: otel
+  labels:
+    app: otel-collector
+data:
+  otel-collector-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+
+    processors:
+      batch:
+
+      resource:
+        attributes:
+          - action: insert
+            key: service.name
+            value: "java-sandbox-otel-ddagent"
+
+    exporters:
+      otlp:
+        endpoint: "datadog-agent:4317"
+        tls:
+          insecure: true
+
+      logging:
+        loglevel: debug
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch, resource]
+          exporters: [otlp, logging]
+        metrics:
+          receivers: [otlp]
+          processors: [batch, resource]
+          exporters: [otlp, logging]
+      telemetry:
+        logs:
+          level: "debug"
+```
+
+### Passo 2: Implantar o OpenTelemetry Collector
+
+Ainda no arquivo `otel-collector.yaml`, adicione o Deployment e o Service do Collector:
+
+```yaml
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: otel
+  labels:
+    app: otel-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+    spec:
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector-contrib:0.82.0
+          imagePullPolicy: IfNotPresent
+          command:
+            - "/otelcol-contrib"
+            - "--config=/etc/otel-collector-config.yaml"
+          ports:
+            - name: otlp-grpc
+              containerPort: 4317
+            - name: otlp-http
+              containerPort: 4318
+          volumeMounts:
+            - name: otel-collector-config-vol
+              mountPath: /etc/otel-collector-config.yaml
+              subPath: otel-collector-config.yaml
+      volumes:
+        - name: otel-collector-config-vol
+          configMap:
+            name: otel-collector-config
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: otel
+  labels:
+    app: otel-collector
+spec:
+  selector:
+    app: otel-collector
+  ports:
+    - name: otlp-grpc
+      protocol: TCP
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      protocol: TCP
+      port: 4318
+      targetPort: 4318
+```
+
+### Passo 3: Aplicar o Arquivo no Kubernetes
+
+Execute o comando:
+
+```bash
+kubectl apply -f otel-collector.yaml -n otel
+```
+
+Isso implantará o OpenTelemetry Collector no namespace `otel`.
+
+---
+
+## 3. Configuração do Datadog Agent para Receber Telemetria
+
+### Passo 1: Configurar o Datadog Agent via Helm
+
+Crie ou edite o arquivo `values.yaml` para configurar o Datadog Agent:
+
+```yaml
+datadog:
+  apiKey: "<SUA_DATADOG_API_KEY>"
+  apm:
+    enabled: true
+  otlp:
+    receiver:
+      protocols:
+        grpc:
+          enabled: true
+          endpoint: "0.0.0.0:4317"
+          useHostPort: false
+        http:
+          enabled: true
+          endpoint: "0.0.0.0:4318"
+          useHostPort: false
+```
+
+### Passo 2: Implantar ou Atualizar o Datadog Agent
+
+Utilize o Helm para instalar ou atualizar o Datadog Agent:
+
+```bash
+helm repo add datadog https://helm.datadoghq.com
+helm repo update
+helm upgrade --install datadog-agent datadog/datadog -f values.yaml
+```
+
+Certifique-se de substituir `<SUA_DATADOG_API_KEY>` pela sua API Key do Datadog.
+
+### Passo 3: Verificar o Deployment do Datadog Agent
+
+Verifique se o Datadog Agent está em execução:
+
+```bash
+kubectl get pods -l app=datadog -n <NAMESPACE_DO_AGENT>
+```
+
+---
+
+## Conclusão
+
+Seguindo estes passos, você configurou:
+
+- Sua aplicação para enviar dados de telemetria para o OpenTelemetry Collector.
+- O OpenTelemetry Collector para receber os dados da aplicação e encaminhá-los para o Datadog Agent.
+- O Datadog Agent para receber os dados OTLP do Collector e enviá-los para o Datadog.
+
+Agora você pode acessar o painel do Datadog e visualizar os dados de telemetria da sua aplicação.
+
+---
+
+Se tiver dúvidas ou precisar de assistência adicional, não hesite em buscar ajuda.
+
+---

@@ -1,0 +1,125 @@
+# ConfigMap para o OpenTelemetry Collector
+# Observação: Crie o Secret da API Key do Datadog com o comando:
+# kubectl create secret generic datadog-api-key -n otel --from-literal=api-key=<SUA_DATADOG_API_KEY>
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: otel
+  labels:
+    app: otel-collector
+data:
+  otel-collector-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+
+    processors:
+      batch:
+
+      resource:
+        attributes:
+          - action: insert
+            key: service.name
+            value: "sandbox-service"
+
+    exporters:
+      datadog:
+        api:
+          key: "${DD_API_KEY}"
+          site: "datadoghq.com"  # Substitua pelo site apropriado, como "datadoghq.eu" se necessário
+        host_metadata:
+          enabled: false
+        metrics:
+          sums:
+            cumulative_monotonic_mode: to_delta
+
+      logging:
+        loglevel: debug
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch, resource]
+          exporters: [datadog, logging]
+        metrics:
+          receivers: [otlp]
+          processors: [batch, resource]
+          exporters: [datadog, logging]
+      telemetry:
+        logs:
+          level: "debug"  # Ativa logs detalhados para depuração
+
+---
+
+# Deployment do OpenTelemetry Collector
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: otel
+  labels:
+    app: otel-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+    spec:
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector-contrib:0.82.0
+          imagePullPolicy: IfNotPresent
+          command:
+            - "/otelcol-contrib"
+            - "--config=/etc/otel-collector-config.yaml"
+          ports:
+            - name: otlp-grpc
+              containerPort: 4317  # OTLP gRPC
+            - name: otlp-http
+              containerPort: 4318  # OTLP HTTP
+          env:
+            - name: DD_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: datadog-api-key
+                  key: api-key
+          volumeMounts:
+            - name: otel-collector-config-vol
+              mountPath: /etc/otel-collector-config.yaml
+              subPath: otel-collector-config.yaml
+      volumes:
+        - name: otel-collector-config-vol
+          configMap:
+            name: otel-collector-config
+
+---
+
+# Service do OpenTelemetry Collector
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: otel
+  labels:
+    app: otel-collector
+spec:
+  selector:
+    app: otel-collector
+  ports:
+    - name: otlp-grpc
+      protocol: TCP
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      protocol: TCP
+      port: 4318
+      targetPort: 4318

@@ -1,0 +1,11 @@
+import type { RawError } from '@datadog/browser-core';
+import type { CiVisibilityContext } from './contexts/ciVisibilityContext';
+import type { LifeCycle } from './lifeCycle';
+import type { ViewContexts } from './contexts/viewContexts';
+import { type RumSessionManager } from './rumSessionManager';
+import type { UrlContexts } from './contexts/urlContexts';
+import type { RumConfiguration } from './configuration';
+import type { ActionContexts } from './action/actionCollection';
+import type { DisplayContext } from './contexts/displayContext';
+import type { CommonContext } from './contexts/commonContext';
+export declare function startRumAssembly(configuration: RumConfiguration, lifeCycle: LifeCycle, sessionManager: RumSessionManager, viewContexts: ViewContexts, urlContexts: UrlContexts, actionContexts: ActionContexts, displayContext: DisplayContext, ciVisibilityContext: CiVisibilityContext, getCommonContext: () => CommonContext, reportError: (error: RawError) => void): void;

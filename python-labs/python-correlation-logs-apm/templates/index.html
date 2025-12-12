@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datadog Sandbox Python</title>
+    <style>
+        body {
+            background-color: #5928e5;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 50px;
+        }
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 20px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+        .button-blue {
+            background-color: #1e90ff;
+        }
+        .button-purple {
+            background-color: #6A0DAD;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 20px;
+            color: yellow;
+        }
+    </style>
+    <script>
+        function generateTrace() {
+            fetch('/generate_trace', {
+                method: 'POST'
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('message').textContent = data;
+            });
+        }
+
+        function generateLog() {
+            fetch('/generate_log', {
+                method: 'POST'
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('message').textContent = data;
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Datadog Sandbox Python</h1>
+    <button class="button button-blue" onclick="generateTrace()">Let's Go Trace</button>
+    <button class="button button-purple" onclick="generateLog()">Let's Go Logs</button>
+    <h2 id="message" class="message"></h2>
+</body>
+</html>

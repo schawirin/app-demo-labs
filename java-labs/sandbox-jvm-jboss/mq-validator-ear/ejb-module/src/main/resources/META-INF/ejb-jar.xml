@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ejb-jar xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         version="4.0">
+    <enterprise-beans>
+        <message-driven>
+            <ejb-name>MQConsumerMDB</ejb-name>
+            <ejb-class>com.company.mq.MQConsumerMDB</ejb-class>
+            <mapped-name>mqConsumer</mapped-name>
+        </message-driven>
+    </enterprise-beans>
+
+    <!-- Definição dos recursos -->
+    <assembly-descriptor>
+        <container-transaction>
+            <method>
+                <ejb-name>MQProducerBean</ejb-name>
+                <method-name>*</method-name>
+            </method>
+            <trans-attribute>Required</trans-attribute>
+        </container-transaction>
+    </assembly-descriptor>
+</ejb-jar>

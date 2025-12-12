@@ -1,0 +1,54 @@
+datadog:
+  apiKeyExistingSecret: datadog-secret
+  site: us5.datadoghq.com
+  clusterName: production-gke
+  containerExclude: "name:.*"
+  containerInclude: "name:^webhook.* name:^pix.* name:^commerce.* name:^payment.* name:^jdspi-agent.* name:^funding.*"
+  containerIncludeLogs: "name:^webhook.* name:^pix.* name:^commerce.* name:^payment.* name:^jdspi-agent.* name:^funding.*"
+
+  apm:
+    enable: true
+    portEnabled: true
+
+  logs:
+    enabled: true
+    containerCollectAll: true
+
+  clusterAgent:
+    enabled: true
+    admissionController:
+      enabled: true
+
+agents:
+  enabled: true
+  useConfigMap: true
+  customAgentConfig:
+    kubelet_tls_verify: false
+    vector:
+    apm_config:
+      # apm_dd_url: "http://vector.cora.team:8282"
+      # max_traces_per_second: 0
+      # errors_per_second: 0
+      ignore_resources: ["GET /healthcheck", "GET /health", "GET /healthz", "GET /metrics"]
+      compute_stats_by_span_kind: true
+      peer_tags_aggregation: true
+      additional_endpoints:
+        "http://vector.cora.team:8282": {}
+      probabilistic_sampler:
+        enabled: true
+        sampling_percentage: 10
+    logs_config:
+      logs_dd_url: "http://vector.cora.team:8282"
+    dogstatsd_non_local_traffic: true
+    kubernetes_namespace_labels_as_tags:
+      kubernetes.io/metadata.name: "kube_namespace"
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
+  nodeSelector:
+    cloud.google.com/gke-nodepool: node-pool-18
+  tolerations:
+    - key: "cora"
+      operator: "Equal"
+      value: "apps"
+      effect: "NoSchedule"
+  priorityClassName: "high-priority"

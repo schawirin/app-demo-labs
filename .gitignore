@@ -1,0 +1,18 @@
+ecommerce_nextjs-lab/ecommerce_sanity_stripe/
+security-labs/vulnerability/
+<<<<<<< HEAD
+=======
+.terraform/
+.terraform/
+.next/cache/
+*.zip
+.terraform/
+.next/cache/
+*.zip
+>>>>>>> dev
+.DS_Store
+**/.DS_Store
+**/pg_control
+.DS_Store
+**/.DS_Store
+**/pg_control

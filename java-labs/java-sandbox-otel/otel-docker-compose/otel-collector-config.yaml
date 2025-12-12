@@ -1,0 +1,39 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+processors:
+  batch:
+
+exporters:
+  datadog:
+    api:
+      key: "sua-apikey"
+      site: "datadoghq.com"  # Substitua pela sua chave de API do Datadog
+    metrics:
+      # Remova ou comente a linha abaixo, pois ela foi removida
+      # send_monotonic_counter: true
+
+      # Use a nova configuração recomendada
+      sums:
+        # Opções disponíveis:
+        #   - `cumulative`: Envia métricas como cumulativas
+        #   - `to_delta`: Converte cumulativas para deltas
+        # Escolha a opção que melhor se adequa ao seu caso. Exemplo:
+        cumulative_monotonic_mode: to_delta
+
+    # Opcional: especifique o site se não estiver usando o datadoghq.com padrão
+    # site: "datadoghq.eu"
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [datadog]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [datadog]

@@ -1,0 +1,7 @@
+{
+  "action": "calculate",
+  "data": {
+    "operation": "fibonacci",
+    "n": 30
+  }
+}

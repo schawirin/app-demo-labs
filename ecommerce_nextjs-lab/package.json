@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@datadog/browser-logs": "^6.2.1",
+    "@datadog/browser-rum": "^6.2.1"
+  }
+}

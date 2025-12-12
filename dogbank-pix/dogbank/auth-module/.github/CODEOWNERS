@@ -1,0 +1,5 @@
+# dono de todo o repositório: time demo-labs e você
+* @Datadog/demo-labs @pedro-schawirin
+
+# exemplo de granularidade: módulo dogbank também explicitamente
+/dogbank/ @Datadog/demo-labs @pedro-schawirin
