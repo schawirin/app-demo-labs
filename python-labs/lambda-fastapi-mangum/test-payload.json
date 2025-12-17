@@ -1,0 +1,28 @@
+{
+  "resource": "/health",
+  "path": "/health",
+  "httpMethod": "GET",
+  "headers": {
+    "Accept": "application/json",
+    "Host": "lambda-test"
+  },
+  "multiValueHeaders": {},
+  "queryStringParameters": null,
+  "multiValueQueryStringParameters": null,
+  "pathParameters": null,
+  "stageVariables": null,
+  "requestContext": {
+    "resourceId": "123456",
+    "resourcePath": "/health",
+    "httpMethod": "GET",
+    "requestId": "test-request-id",
+    "accountId": "061039767542",
+    "stage": "test",
+    "protocol": "HTTP/1.1",
+    "identity": {
+      "sourceIp": "127.0.0.1"
+    }
+  },
+  "body": null,
+  "isBase64Encoded": false
+}

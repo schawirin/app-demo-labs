@@ -1,0 +1,1 @@
+{"statusCode": 200, "body": "{\"operation\": \"calculate_pi\", \"iterations\": 10000, \"result\": 3.1414926535900345, \"execution_time_ms\": 2.0, \"timestamp\": \"2025-12-15T18:54:42.391731\"}"}

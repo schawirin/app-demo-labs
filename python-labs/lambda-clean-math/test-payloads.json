@@ -1,0 +1,34 @@
+{
+  "fibonacci_10": {
+    "operation": "fibonacci",
+    "number": 10
+  },
+  "fibonacci_15": {
+    "operation": "fibonacci",
+    "number": 15
+  },
+  "factorial_5": {
+    "operation": "factorial",
+    "number": 5
+  },
+  "factorial_10": {
+    "operation": "factorial",
+    "number": 10
+  },
+  "prime_17": {
+    "operation": "prime",
+    "number": 17
+  },
+  "prime_100": {
+    "operation": "prime",
+    "number": 100
+  },
+  "calculate_pi": {
+    "operation": "pi",
+    "iterations": 10000
+  },
+  "statistics": {
+    "operation": "stats",
+    "numbers": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+  }
+}
