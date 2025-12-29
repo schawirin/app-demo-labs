@@ -4,10 +4,22 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-variable "function_name" {
-  description = "Lambda function name"
-  type        = string
-  default     = "fastapi-mangum-test"
+# Map of Lambda functions to manage with for_each
+variable "lambda_functions" {
+  description = "Map of Lambda functions to configure with Datadog"
+  type = map(object({
+    function_name          = string
+    handler                = string
+    original_handler       = string
+    memory_size            = number
+    timeout                = number
+    dd_env                 = string
+    dd_service             = string
+    dd_version             = string
+    log_retention_days     = number
+    environment_variables  = map(string)
+    tags                   = map(string)
+  }))
 }
 
 variable "fastapi_layer_arn" {
@@ -38,22 +50,4 @@ variable "datadog_site" {
   description = "Datadog site"
   type        = string
   default     = "datadoghq.com"
-}
-
-variable "dd_env" {
-  description = "Environment tag"
-  type        = string
-  default     = "lab"
-}
-
-variable "dd_service" {
-  description = "Service name"
-  type        = string
-  default     = "fastapi-mangum-test"
-}
-
-variable "dd_version" {
-  description = "Version"
-  type        = string
-  default     = "1.0.0"
 }
