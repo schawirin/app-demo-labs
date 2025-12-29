@@ -1,0 +1,53 @@
+aws_region = "us-east-1"
+
+# Datadog Configuration
+datadog_api_key = "<YOUR_DATADOG_API_KEY>"
+datadog_site    = "datadoghq.com"
+
+# Layer ARNs
+fastapi_layer_arn           = "arn:aws:lambda:us-east-1:061039767542:layer:fastapi-mangum-layer:2"
+datadog_extension_layer_arn = "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Extension:67"
+datadog_python_layer_arn    = "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Python312:114"
+
+# Lambda Functions Configuration using for_each
+lambda_functions = {
+  # Lambda 1 - FastAPI Mangum Original
+  lambda1 = {
+    function_name          = "fastapi-mangum-test"
+    handler                = "datadog_lambda.handler.handler"
+    original_handler       = "handler.handler"
+    memory_size            = 128
+    timeout                = 30
+    dd_env                 = "lab"
+    dd_service             = "fastapi-mangum-test"
+    dd_version             = "1.0.0"
+    log_retention_days     = 7
+    environment_variables  = {}
+    tags = {
+      Environment = "lab"
+      Purpose     = "Datadog APM Testing - Support Case 2392372"
+      Lambda      = "lambda1"
+    }
+  }
+
+  # Lambda 2 - Segunda Lambda para teste de for_each
+  lambda2 = {
+    function_name          = "fastapi-mangum-test-2"
+    handler                = "datadog_lambda.handler.handler"
+    original_handler       = "handler.handler"
+    memory_size            = 256
+    timeout                = 60
+    dd_env                 = "lab"
+    dd_service             = "fastapi-mangum-test-2"
+    dd_version             = "2.0.0"
+    log_retention_days     = 14
+    environment_variables  = {
+      CUSTOM_VAR = "lambda2-value"
+    }
+    tags = {
+      Environment = "lab"
+      Purpose     = "Datadog APM Testing - for_each demonstration"
+      Lambda      = "lambda2"
+    }
+  }
+}
